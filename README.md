@@ -12,6 +12,9 @@ O projeto já possui documentação técnica, um perfil experimental para Minecr
 - scripts/validate_profile.py: valida versão, arquitetura, heap e argumentos JVM.
 - tests/test_profile.py: testes de regressão do validador.
 - .github/workflows/validate.yml: validação automática do projeto.
+- config/compatibility-minecraft-1.12.2.json: contrato verificável de compatibilidade para Forge, OptiFine, mods e modpacks.
+- scripts/validate_compatibility.py e tests/test_compatibility.py: validador e testes para esse contrato.
+- docs/MOD_COMPATIBILITY.md: requisitos do classpath, JNI, LWJGL, OptiFine e testes por etapas.
 - docs/: arquitetura, seleção da base, formato do perfil, testes, roadmap e compatibilidade com CS Launcher Plus.
 - scripts/package_cslauncher_runtime.py: valida e empacota uma JRE Java 8 ARM64 no formato MultiRT do CS Launcher Plus.
 
@@ -33,9 +36,9 @@ O GitHub Actions executa essas verificações em alterações na branch main.
 
 ## Limitações importantes
 
-O perfil JSON não é uma JVM. Uma VM iniciar também não prova que Forge, OptiFine, JNI ou renderização funcionarão. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
+O perfil e o contrato de compatibilidade não são uma JVM. O projeto define Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste, mas ainda não executou esses componentes com uma runtime própria. A VM, JNI, classpath, bibliotecas LWJGL e renderização precisam ser validados em Android real. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
 
-Consulte [docs/ROADMAP.md](docs/ROADMAP.md), [docs/BUILD_STATUS.md](docs/BUILD_STATUS.md), [docs/OPENJDK8_SOURCE_AUDIT.md](docs/OPENJDK8_SOURCE_AUDIT.md) e [docs/OPENJDK8_ANDROID_PATCH_REVIEW.md](docs/OPENJDK8_ANDROID_PATCH_REVIEW.md), [docs/OPENJDK8_PATCH_FINDINGS.md](docs/OPENJDK8_PATCH_FINDINGS.md) e [docs/OPENJDK8_PATCH_INVENTORY.md](docs/OPENJDK8_PATCH_INVENTORY.md) e [docs/OPENJDK8_TEST_MATRIX.md](docs/OPENJDK8_TEST_MATRIX.md) para auditorias e estado das etapas.
+Consulte [docs/ROADMAP.md](docs/ROADMAP.md), [docs/BUILD_STATUS.md](docs/BUILD_STATUS.md), [docs/OPENJDK8_SOURCE_AUDIT.md](docs/OPENJDK8_SOURCE_AUDIT.md) e [docs/OPENJDK8_ANDROID_PATCH_REVIEW.md](docs/OPENJDK8_ANDROID_PATCH_REVIEW.md), [docs/OPENJDK8_PATCH_FINDINGS.md](docs/OPENJDK8_PATCH_FINDINGS.md) e [docs/OPENJDK8_PATCH_INVENTORY.md](docs/OPENJDK8_PATCH_INVENTORY.md) e [docs/OPENJDK8_TEST_MATRIX.md](docs/OPENJDK8_TEST_MATRIX.md), [docs/MOD_COMPATIBILITY.md](docs/MOD_COMPATIBILITY.md) e [config/compatibility-minecraft-1.12.2.json](config/compatibility-minecraft-1.12.2.json) para auditorias, compatibilidade e estado das etapas.
 
 ## Licenças
 
