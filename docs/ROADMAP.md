@@ -31,11 +31,17 @@
 - [ ] Validar carregamento e permissões de arquivos no Android 12.
 
 ## Marco 3 — Compatibilidade Minecraft
+- [x] Definir contrato verificável de compatibilidade para Java 8 / bytecode 52 / ARM64.
+- [x] Definir Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste separados e combinados.
+- [x] Definir regras para preservar classpath, dependências, bibliotecas nativas e arquivos de modpacks.
+- [x] Adicionar validador, testes de regressão e CI para o contrato de compatibilidade.
 - [ ] Testar Minecraft 1.12.2 sem mods.
 - [ ] Testar Forge 14.23.5.2864.
 - [ ] Adicionar mods em grupos pequenos e manter logs.
-- [ ] Testar OptiFine separadamente.
-- [ ] Validar renderização, LWJGL/JNI e integração com o FCL.
+- [ ] Testar OptiFine HD U G5 separadamente.
+- [ ] Testar Forge + OptiFine HD U G5 juntos.
+- [ ] Testar modpack grande e validar tamanho do classpath, memória e tempo de inicialização.
+- [ ] Validar renderização, LWJGL/JNI e integração com o FCL e CS Launcher Plus.
 
 ## Marco 4 — Desempenho e estabilidade
 - [ ] Criar benchmark repetível no mesmo aparelho.
