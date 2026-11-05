@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build-arm64:
     name: Compile OpenJDK 8 HotSpot Server for Android ARM64
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
       - name: Checkout Mikael Runtime 8
@@ -47,6 +47,17 @@ jobs:
 
       - name: Verify build preparation tests
         run: python3 -m unittest discover -s tests -p 'test_prepare_mojo_openjdk8_build.py' -v
+
+      - name: Verify host GLIBC for pinned GCC toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          glibc_version="$(getconf GNU_LIBC_VERSION | awk '{print $2}')"
+          echo "Host GLIBC: $glibc_version"
+          if [[ "$(printf '2.38\\n%s\\n' "$glibc_version" | sort -V | head -n 1)" != "2.38" ]]; then
+            echo "Pinned GCC 13 toolchain requires host GLIBC >= 2.38." >&2
+            exit 1
+          fi
 
       - name: Fetch exact MojoLauncher build recipe
         shell: bash
