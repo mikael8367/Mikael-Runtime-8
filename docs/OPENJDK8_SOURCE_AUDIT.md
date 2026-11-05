@@ -4,7 +4,7 @@
 **Escopo:** revisão estática do pipeline público PojavLauncherTeam/android-openjdk-build-multiarch, branch `buildjre8`, commit `04b90441da7e9649cb6508a037423f08d1fc531f`, e dos pontos de entrada do OpenJDK 8 usados por ele.  
 **Resultado:** candidato tecnicamente relevante, mas não aprovado para execução/compilação automática nem para virar a base de produção da Mikael Runtime 8.
 
-> Esta é uma auditoria estática documentada dos scripts e metadados acessíveis. Não equivale a uma auditoria linha a linha de todo o OpenJDK, HotSpot, bibliotecas nativas ou patches de 2,38 MB, nem a uma compilação reproduzível.
+ > Esta é uma auditoria estática do wrapper e do diff Android identificado. Não equivale à auditoria de todo o código-base OpenJDK não modificado, nem a uma compilação reproduzível ou validação no Android.
 
 ## Resumo executivo
 
@@ -90,9 +90,13 @@ O projeto Pojav é uma receita histórica para portar OpenJDK 8 a Android, inclu
 
 **Não copiar nem executar o pipeline histórico diretamente.** Usá-lo como referência técnica para identificar patches Android e requisitos de ABI. A base deve ser reavaliada com fonte JDK 8u fixada, patches revisados, dependências verificadas e build isolado.
 
+## Atualização do patch principal
+
+O diff principal foi recuperado integralmente por SHA. Seu inventário tem 207 caminhos, 58.398 linhas adicionadas e 114 removidas. A revisão e os achados estão em [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md), [OPENJDK8_PATCH_FINDINGS.md](OPENJDK8_PATCH_FINDINGS.md) e [OPENJDK8_PATCH_INVENTORY.md](OPENJDK8_PATCH_INVENTORY.md). O patch não foi aprovado para integração direta.
+
 ## Próximas ações de engenharia
 
-1. Baixar e revisar o diff dos patches Android por subsistema: HotSpot, JNI, AWT/Java2D, libc/Bionic, threads, memória e sinais.
+1. Corrigir os achados registrados em OPENJDK8_PATCH_FINDINGS.md e adicionar testes de regressão.
 2. Escolher e fixar a revisão exata do OpenJDK 8u e validar compatibilidade dos patches.
 3. Montar manifesto de dependências com hashes e licenças.
 4. Remover tmate e qualquer download sem verificação antes de criar CI de build.
