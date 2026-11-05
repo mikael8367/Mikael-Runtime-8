@@ -13,7 +13,7 @@ class PrepareMojoBuildTests(unittest.TestCase):
 
     def test_all_source_and_patch_pins_are_immutable(self):
         self.assertEqual(len(OPENJDK_COMMIT), 40)
-        self.assertEqual(len(PATCH_BLOBS), 4)
+        self.assertEqual(len(PATCH_BLOBS), 5)
         self.assertTrue(all(len(value) == 40 for value in PATCH_BLOBS.values()))
         self.assertEqual(len(GCC_SHA256), 64)
 
@@ -93,6 +93,17 @@ fi'''
         self.assertIn("Explicit user-selected collectors are preserved", patch_text)
         self.assertNotIn("UseG1GC, true", patch_text)
 
+    def test_android_adaptive_heap_patch_is_pinned_and_preserves_user_override(self):
+        patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_adaptive_heap.diff"
+        patch = patch_path.read_bytes()
+        self.assertEqual(git_blob_sha(patch), PATCH_BLOBS["mikael_android_adaptive_heap.diff"])
+        patch_text = patch.decode("utf-8")
+        self.assertIn("#ifdef __ANDROID__", patch_text)
+        self.assertIn("FLAG_SET_DEFAULT(MaxHeapFreeRatio, 85);", patch_text)
+        self.assertIn("FLAG_SET_DEFAULT(MaxHeapFreeRatio, 100);", patch_text)
+        self.assertIn("if (FLAG_IS_DEFAULT(MaxHeapFreeRatio))", patch_text)
+        self.assertNotIn("FLAG_SET_CMDLINE", patch_text)
+
     def test_patch_block_fails_closed(self):
         block = strict_patch_block()
         self.assertIn("git apply --check", block)
@@ -103,6 +114,8 @@ fi'''
         self.assertIn(".mikael-android-branding.compat.diff", block)
         self.assertIn("mikael_android_parallel_gc.diff", block)
         self.assertIn("46f5cec59df926f869de7847246ea841e8865c47", block)
+        self.assertIn("mikael_android_adaptive_heap.diff", block)
+        self.assertIn("9abd008332a0e4451f486b12e3872bac42e50e26", block)
 
 if __name__ == "__main__":
     unittest.main()
