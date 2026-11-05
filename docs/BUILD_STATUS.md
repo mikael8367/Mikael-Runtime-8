@@ -35,6 +35,12 @@ A revisão estática inicial está registrada em [OPENJDK8_SOURCE_AUDIT.md](OPEN
 
 O diff principal foi recuperado por SHA e inventariado: 207 caminhos, 58.398 linhas adicionadas e 114 removidas. Consulte [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md), [OPENJDK8_PATCH_FINDINGS.md](OPENJDK8_PATCH_FINDINGS.md) e [OPENJDK8_PATCH_INVENTORY.md](OPENJDK8_PATCH_INVENTORY.md). A revisão estática encontrou pontos que bloqueiam a adoção direta, incluindo conversão de texto, coerência AWT/GLX e validação de dados de rede/caminhos nativos. Ainda não houve compilação nem testes no dispositivo.
 
+## Auditoria automatizada da receita upstream
+
+Foi adicionado `scripts/audit_openjdk8_recipe.py`, com testes unitários, para confirmar o commit histórico e os Git blob SHAs de 12 scripts/workflows de build. O script registra os riscos já identificados sem executar a receita: falhas de patch toleradas, clone OpenJDK sem SHA, downloads sem checksum, extração imediata do NDK, tag de ferramenta mutável e tmate no CI. O workflow de preflight agora gera `openjdk8-upstream-audit.txt` junto do relatório de patches.
+
+Esta etapa melhora a rastreabilidade, mas **não remove os riscos nem libera o build**. NDK r10e e dependências ainda precisam de hashes oficiais verificados; o build upstream continua sem ser executado.
+
 ## Próxima entrega técnica
 
 A próxima etapa é corrigir os achados prioritários em uma cópia controlada dos patches, revisar licenças/proveniência e só então preparar um build reproduzível. Só depois disso deve ser criado um workflow de build e publicação de artefatos. Nenhum APK será gerado sem pedido explícito.
