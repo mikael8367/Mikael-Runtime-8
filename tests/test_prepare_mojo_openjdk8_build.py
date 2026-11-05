@@ -109,7 +109,7 @@ fi'''
         patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_adaptive_heap.diff"
         lines = patch_path.read_text(encoding="utf-8").splitlines()
         hunk = next(line for line in lines if line.startswith("@@ "))
-        match = re.match(r"@@ -(\\d+)(?:,(\\d+))? \\+(\\d+)(?:,(\\d+))? @@", hunk)
+        match = re.match(r"@@ -(\d+)(?:,(\d+))? \\+(\d+)(?:,(\d+))? @@", hunk)
         self.assertIsNotNone(match)
         expected_old = int(match.group(2) or "1")
         expected_new = int(match.group(4) or "1")
