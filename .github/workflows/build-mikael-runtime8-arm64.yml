@@ -8,6 +8,7 @@ on:
       - ".github/workflows/build-mikael-runtime8-arm64.yml"
       - "scripts/prepare_mojo_openjdk8_build.py"
       - "patches/mikael_android_parallel_gc.diff"
+      - "patches/mikael_android_adaptive_heap.diff"
       - "scripts/package_cslauncher_runtime.py"
       - "tests/test_prepare_mojo_openjdk8_build.py"
       - "tests/test_cslauncher_package.py"
@@ -130,6 +131,7 @@ jobs:
             echo "Architecture: AArch64 / ELF64"
             echo "VM: HotSpot Server"
             echo "Android default GC: Parallel GC (unless explicitly overridden)"
+            echo "Android Parallel GC MaxHeapFreeRatio: 85 (only if not explicitly set)"
             echo "Device execution: NOT YET VERIFIED"
             echo "Minecraft/Forge/OptiFine: NOT YET VERIFIED"
             cat build-output/SHA256SUMS
