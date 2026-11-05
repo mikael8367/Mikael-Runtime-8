@@ -9,7 +9,7 @@
 - [x] Documentar o contrato MultiRT do CS Launcher Plus.
 - [x] Criar empacotador e testes do arquivo de runtime compatível com CS Launcher Plus.
 - [x] Confirmar os testes do projeto e do contrato no GitHub Actions.
-- [ ] Confirmar a compilação e publicação do kit de diagnóstico.
+- [ ] Confirmar a compilação e publicação do kit de diagnóstico após a última alteração.
 - [ ] Confirmar execução verde do workflow no GitHub.
 
 ## Marco 1 — Escolha e reprodução da base Java 8
@@ -31,6 +31,8 @@
 - [ ] Compilar uma runtime mínima a partir de fonte validada.
 - [ ] Verificar ABI, dependências nativas e nível mínimo do Android.
 - [x] Criar kit Java 8 de diagnóstico para executar no Android.
+- [x] Melhorar o diagnóstico para salvar relatório no aparelho e incluir propriedades da VM.
+- [ ] Confirmar a compilação e publicação do kit atualizado no Actions.
 - [ ] Executar o kit em uma runtime Java 8 ARM64 real e guardar o relatório.
 - [ ] Compilar a Mikael Runtime 8 própria.
 - [ ] Executar java -version e testes básicos de classes, threads e JNI na runtime própria em Android real.
