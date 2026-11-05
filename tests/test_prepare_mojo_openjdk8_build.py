@@ -2,7 +2,8 @@ import unittest
 
 from scripts.prepare_mojo_openjdk8_build import (
     GCC_SHA256, OPENJDK_COMMIT, PATCH_BLOBS, git_blob_sha,
-    hardened_scripts, harden_buildlibs_script, inject_toolchain_smoke_test, smoke_test_script, strict_patch_block,
+    hardened_scripts, harden_buildlibs_script, inject_toolchain_smoke_test, smoke_test_script,
+    strict_patch_block, compatible_branding_patch,
 )
 
 class PrepareMojoBuildTests(unittest.TestCase):
@@ -66,6 +67,13 @@ fi'''
         with self.assertRaises(ValueError):
             inject_toolchain_smoke_test("  ./maketoolchain.sh\n  ./maketoolchain.sh\n")
 
+    def test_branding_patch_does_not_depend_on_stale_update_version(self):
+        patch = compatible_branding_patch()
+        self.assertIn('PRODUCT_NAME=OpenJDK', patch)
+        self.assertIn('-PRODUCT_SUFFIX="Runtime Environment"', patch)
+        self.assertIn('+PRODUCT_SUFFIX="Runtime Environment (Android)"', patch)
+        self.assertNotIn('JDK_UPDATE_VERSION=502', patch)
+
     def test_patch_block_fails_closed(self):
         block = strict_patch_block()
         self.assertIn("git apply --check", block)
@@ -73,6 +81,7 @@ fi'''
         self.assertNotIn("--reject", block)
         self.assertNotIn("|| echo", block)
         self.assertIn("ba84685b24586d4794e7822f2927f62e960f0c4e", block)
+        self.assertIn(".mikael-android-branding.compat.diff", block)
 
 if __name__ == "__main__":
     unittest.main()
