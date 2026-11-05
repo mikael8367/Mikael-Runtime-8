@@ -90,6 +90,27 @@ class CsLauncherPackageTests(unittest.TestCase):
             (root / "lib" / "aarch64" / "server" / "dangling.so").symlink_to("missing.so")
             self.assertTrue(any("Dangling symlink" in e for e in validate_jre(root)))
 
+    def test_rejects_wrong_archive_extension(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "jre"
+            self.make_fake_jre(root)
+            with self.assertRaisesRegex(ValueError, r"\\.tar\\.xz"):
+                package_jre(root, Path(tmp) / "runtime.zip")
+
+    def test_archive_is_xz_compressed_tar_with_flat_jre_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "jre"
+            output = Path(tmp) / "Mikael-Runtime-8-Android-ARM64.tar.xz"
+            self.make_fake_jre(root)
+            package_jre(root, output)
+            self.assertEqual(output.read_bytes()[:6], bytes([253, 55, 122, 88, 90, 0]))
+            with tarfile.open(output, "r:xz") as archive:
+                names = set(archive.getnames())
+                self.assertIn("bin/java", names)
+                self.assertIn("release", names)
+                self.assertIn("lib/rt.jar", names)
+                self.assertNotIn("jre/bin/java", names)
+
     def test_packages_root_layout_and_validates_elf(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
@@ -97,6 +118,12 @@ class CsLauncherPackageTests(unittest.TestCase):
             self.make_fake_jre(root)
             package_jre(root, output)
             self.assertEqual(validate_archive(output), [])
+
+    def test_rejects_archive_with_wrong_extension(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / "runtime.zip"
+            archive.write_bytes(b"not a runtime")
+            self.assertTrue(any(".tar.xz" in e for e in validate_archive(archive)))
 
     def test_rejects_archive_symlink_escape(self):
         with tempfile.TemporaryDirectory() as tmp:
