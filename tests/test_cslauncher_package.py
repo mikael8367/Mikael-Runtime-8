@@ -55,6 +55,16 @@ class CsLauncherPackageTests(unittest.TestCase):
             (root / "bin" / "java").write_text("#!/bin/sh\n", encoding="utf-8")
             self.assertTrue(any("valid ELF" in e for e in validate_jre(root)))
 
+    def test_rejects_symlink_outside_jre(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root = base / "jre"
+            self.make_fake_jre(root)
+            external = base / "outside.so"
+            external.write_bytes(fake_elf())
+            (root / "lib" / "server" / "escape.so").symlink_to(external)
+            self.assertTrue(any("Symlink escapes" in e for e in validate_jre(root)))
+
     def test_packages_root_layout_and_validates_elf(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
@@ -62,6 +72,28 @@ class CsLauncherPackageTests(unittest.TestCase):
             self.make_fake_jre(root)
             package_jre(root, output)
             self.assertEqual(validate_archive(output), [])
+
+    def test_rejects_archive_symlink_escape(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "unsafe.tar.xz"
+            with tarfile.open(output, "w:xz") as archive:
+                info = tarfile.TarInfo("lib/escape.so")
+                info.type = tarfile.SYMTYPE
+                info.linkname = "../../outside.so"
+                archive.addfile(info)
+            errors = validate_archive(output)
+            self.assertTrue(any("Symlink escapes archive root" in e for e in errors))
+
+    def test_rejects_archive_hardlink(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "unsafe.tar.xz"
+            with tarfile.open(output, "w:xz") as archive:
+                info = tarfile.TarInfo("dev/device")
+                info.type = tarfile.LNKTYPE
+                info.linkname = "release"
+                archive.addfile(info)
+            errors = validate_archive(output)
+            self.assertTrue(any("Unsupported archive entry type" in e for e in errors))
 
     def test_rejects_archive_with_extra_root_directory(self):
         with tempfile.TemporaryDirectory() as tmp:
