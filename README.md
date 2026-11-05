@@ -1,30 +1,41 @@
 # Mikael Runtime 8
 
-Distribuição experimental de runtime Java 8 para Android ARM64, com foco em compatibilidade com Minecraft Java 1.12.2 Forge e integração com FCL.
+Projeto experimental de uma distribuição Java 8 para Android ARM64, com foco em Minecraft Java 1.12.2 Forge e integração planejada com FCL e um aplicativo próprio.
 
 ## Estado atual
 
-Este repositório está na fase de estruturação. Ainda não contém uma JVM compilada nem uma runtime instalável.
+O projeto já possui documentação técnica, um perfil experimental para Minecraft 1.12.2, um validador Python, testes de regressão e GitHub Actions. **Ainda não possui JVM compilada, JRE instalável ou runtime pronta para selecionar no FCL.**
 
-## Objetivos
+## O que já existe
 
-- Base OpenJDK 8 validada para Android ARM64.
-- Compatibilidade com Minecraft 1.12.2, Forge e bibliotecas JNI necessárias.
-- Perfil de execução voltado a estabilidade e desempenho mensurável.
-- Integração documentada com FCL e, futuramente, um aplicativo próprio.
-- Testes de inicialização, memória, coleta de lixo, compatibilidade e estabilidade.
+- config/minecraft-1.12.2.json: perfil experimental Java 8 / AArch64.
+- scripts/validate_profile.py: valida versão, arquitetura, heap e argumentos JVM.
+- tests/test_profile.py: testes de regressão do validador.
+- .github/workflows/validate.yml: validação automática do projeto.
+- docs/: arquitetura, seleção da base, formato do perfil, testes e roadmap.
 
-## Princípios
+## Validar
 
-1. Não declarar ganhos de FPS sem benchmarks reproduzíveis.
-2. Não distribuir binários até validar origem, arquitetura e licenças.
-3. Priorizar compatibilidade e estabilidade antes de otimizações agressivas.
-4. Não incluir APK neste projeto enquanto não houver pedido explícito.
+Em um ambiente com Python 3.12 ou compatível:
 
-## Planejamento
+    python scripts/validate_profile.py
+    python -m unittest discover -s tests -v
 
-Consulte `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/BASE_SELECTION.md` e `docs/TESTING.md`.
+O GitHub Actions executa essas verificações em alterações na branch main.
+
+## Objetivos técnicos
+
+- Java 8 para Android arm64-v8a.
+- Compatibilidade progressiva com Minecraft 1.12.2 e Forge.
+- Integração com FCL e, posteriormente, aplicativo próprio.
+- Prioridade em estabilidade; otimizações de FPS somente após benchmark reproduzível.
+
+## Limitações importantes
+
+O perfil JSON não é uma JVM. Uma VM iniciar também não prova que Forge, OptiFine, JNI ou renderização funcionarão. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
+
+Consulte docs/ROADMAP.md para o estado das etapas e docs/BUILD_STATUS.md para o bloqueio atual de compilação.
 
 ## Licenças
 
-O código original deste repositório será licenciado conforme `LICENSE`. Componentes OpenJDK e dependências mantêm suas respectivas licenças e avisos, que deverão acompanhar qualquer distribuição.
+O código original deste repositório usa a licença indicada em LICENSE. OpenJDK e dependências mantêm suas próprias licenças e avisos; a licença MIT deste repositório não altera essas obrigações.
