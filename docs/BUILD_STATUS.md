@@ -1,41 +1,48 @@
-# Estado da compilação da runtime
+# Estado da Mikael Runtime 8
 
-## Situação verificada
+## Situação verificada em 2026-11-05
 
-A primeira pipeline de compilação própria foi adicionada em .github/workflows/build-mikael-runtime8-arm64.yml. **Ainda não há evidência de uma JVM/JRE compilada nem artifact de runtime.** O estado só muda depois de uma execução real e da validação do pacote.
+**Build real concluído e runtime executada no Android 12 ARM64.**
 
-## Pipeline ARM64 criada
+A pipeline Build Mikael Runtime 8 ARM64 gerou o artefato MultiRT `Mikael-Runtime-8-Android-ARM64` em formato `.tar.xz`, com manifesto e SHA-256. O pacote foi importado no CS Launcher Plus e a JVM iniciou Minecraft 1.12.2.
 
-O workflow Build Mikael Runtime 8 ARM64 usa Ubuntu 22.04 e JDK 8 de bootstrap. Ele:
+## Teste real no aparelho
 
-1. Busca a receita MojoLauncher em commit imutável.
-2. Confere os hashes dos três patches Android ARM64.
-3. Fixa OpenJDK 8u, FreeType, CUPS e termux-elf-cleaner por commit.
-4. Baixa NDK r10e e GCC toolchain com verificação SHA-256.
-5. Remove o passo interativo tmate e substitui aplicação parcial de patches por git apply --check + aplicação fatal.
-6. Compila HotSpot Server AArch64.
-7. Valida bin/java, libjvm.so, metadados Java 8 e ELF64/AArch64.
-8. Empacota um .tar.xz no formato MultiRT do CS Launcher Plus e gera SHA-256/manifesto.
+O `latest.log` enviado confirma:
 
-Detalhes dos pinos e limitações: [ARM64_REAL_BUILD.md](ARM64_REAL_BUILD.md).
+- OpenJDK 64-Bit Server VM 1.8.0_512-internal em Linux/aarch64/Android 12.
+- Forge 14.23.5.2860.
+- OptiFine 1.12.2 HD U G5.
+- LWJGL 2.9.4 e GL4ES 1.1.5.
+- ProjectE, Simple Storage Network e ProjectE Storage Bridge carregados.
+- Mundo singleplayer aberto, servidor integrado iniciado e mundo salvo no encerramento.
+- Nenhum crash fatal da JVM aparece no trecho fornecido.
 
-## Outras pré-verificações
+**Limites:** o teste foi curto; não prova estabilidade prolongada, ganho de FPS, compatibilidade com todos os mods nem teste com Forge 14.23.5.2864.
 
-- .github/workflows/openjdk8-arm64-preflight.yml: confere fonte OpenJDK 8u e aplicação sequencial dos patches principais.
-- .github/workflows/audit-mojo-openjdk8.yml: confere commit/blob da receita Mojo e registra riscos estáticos, sem executar o build.
-- scripts/audit_openjdk8_recipe.py: auditoria da receita histórica.
-- scripts/audit_mojo_openjdk8_recipe.py: auditoria da receita mantida pelo Mojo.
+## Problemas observados e responsáveis
 
-## Kit de diagnóstico para teste no celular
+1. **JNA/Narrator:** o JNA tentou carregar uma biblioteca nativa temporária em `/storage/emulated/0/CS LAUNCHER PLUS/.cache/JNA/temp`. O Android bloqueou esse caminho no linker namespace. A correção deve colocar o diretório temporário de JNA no armazenamento privado do aplicativo. Se o launcher aceitar argumento JVM, testar `-Djna.tmpdir=/data/user/0/com.craftstudio.cslauncher/cache`; confirmar no próximo log. É configuração do launcher/JNA, não uma correção comprovada no HotSpot.
+2. **Atrasos do servidor integrado:** foram registrados 2667 ms e 3091 ms de atraso durante o carregamento inicial. A causa ainda não foi isolada. Medir FPS, heap, GC e repetir em mundo já gerado antes de alterar flags.
+3. **OpenGL/GL4ES:** VboRegions não está disponível porque o backend reporta ausência de OpenGL 1.3/ARB_copy_buffer. Shaders também foram bloqueados pelo Fast Render. São limitações/configurações gráficas, não falhas da JVM.
+4. **ProjectE:** avisos EMC Exploit e fluidos ausentes pertencem às receitas/registro de fluidos dos mods. Não modificar a JVM para tentar corrigir esses avisos.
+5. **Forge:** o teste executou 2860; ainda falta uma execução separada com 14.23.5.2864.
 
-O workflow .github/workflows/build-test-kit.yml compila um JAR de diagnóstico Java 8. O kit não contém JVM/JRE; só testa a runtime usada para executá-lo.
+Relatório completo: [ANDROID_TEST_LOG_2026-11-05.md](ANDROID_TEST_LOG_2026-11-05.md).
 
-## Critérios restantes após o build
+## Pipeline ARM64
 
-1. Confirmar build verde e artifact .tar.xz gerado.
-2. Conferir dependências ELF e símbolos Android/Bionic.
-3. Executar java -version, smoke tests, JNI, threads e GC no Android 12 real.
-4. Testar instalação/seleção no FCL e CS Launcher Plus.
-5. Testar Minecraft 1.12.2 Vanilla, Forge 14.23.5.2864, OptiFine HD U G5 e modpack.
+O workflow usa Ubuntu 24.04 e JDK 8 de bootstrap. Ele fixa a receita MojoLauncher, OpenJDK 8u, patches, FreeType, CUPS, NDK r10e, GCC toolchain e termux-elf-cleaner; aplica patches estritamente, compila HotSpot Server AArch64, valida ELF64/AArch64 e empacota o formato MultiRT.
 
-Nenhum APK foi gerado. Nenhum artefato de diagnóstico ou pacote de terceiros será anunciado como Mikael Runtime 8.
+Detalhes: [ARM64_REAL_BUILD.md](ARM64_REAL_BUILD.md).
+
+## Próximos critérios de validação
+
+- [ ] JNA extrair/carregar sua biblioteca a partir de diretório privado do aplicativo.
+- [ ] Testar Forge 14.23.5.2864.
+- [ ] Medir FPS, heap e pausas de GC em condições repetíveis.
+- [ ] Sessão de 20–30 minutos sem crash, acompanhando memória.
+- [ ] Auditar EMC e fluidos no conjunto de mods.
+- [ ] Guardar o próximo latest.log completo e crash report, se houver.
+
+Nenhum APK foi gerado.
