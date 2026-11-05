@@ -18,7 +18,7 @@ O projeto já possui documentação técnica, um perfil experimental para Minecr
 - docs/: arquitetura, seleção da base, formato do perfil, testes, roadmap e compatibilidade com CS Launcher Plus.
 - scripts/package_cslauncher_runtime.py: valida e empacota uma JRE Java 8 ARM64 no formato MultiRT do CS Launcher Plus.
 - tests/device-smoke/: teste Java 8 para verificar uma runtime no próprio Android.
-- .github/workflows/build-test-kit.yml: compila e publica um kit de diagnóstico para baixar pelo celular.
+- .github/workflows/build-test-kit.yml: compila e publica um kit de diagnóstico para baixar pelo celular.\n- .github/workflows/openjdk8-arm64-preflight.yml: valida a fonte OpenJDK 8u e a aplicação ordenada dos patches Android ARM64 antes da compilação.\n- docs/OPENJDK8_ARM64_BUILD.md: critérios e bloqueios da etapa de build da JVM ARM64.
 
 ## Validar
 
@@ -38,7 +38,7 @@ O GitHub Actions executa essas verificações em alterações na branch main.
 
 ## Limitações importantes
 
-O kit de diagnóstico também não é uma JVM: ele serve para testar uma runtime Java 8 que já esteja instalada. A Mikael Runtime 8 ainda não possui binário próprio para selecionar no launcher. O perfil e o contrato de compatibilidade não são uma JVM. O projeto define Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste, mas ainda não executou esses componentes com uma runtime própria. A VM, JNI, classpath, bibliotecas LWJGL e renderização precisam ser validados em Android real. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
+O kit de diagnóstico também não é uma JVM: ele serve para testar uma runtime Java 8 que já esteja instalada. A Mikael Runtime 8 ainda não possui binário próprio para selecionar no launcher. O perfil e o contrato de compatibilidade não são uma JVM. O projeto define Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste, mas ainda não executou esses componentes com uma runtime própria. A VM, JNI, classpath, bibliotecas LWJGL e renderização precisam ser validados em Android real. A fonte OpenJDK 8u e os patches Android agora têm uma pré-verificação automatizada com revisões fixas; isso ainda não é uma JVM compilada. Consulte docs/OPENJDK8_ARM64_BUILD.md.
 
 Para testar uma runtime existente no celular, siga [tests/device-smoke/ANDROID_TEST_GUIDE.md](tests/device-smoke/ANDROID_TEST_GUIDE.md) e baixe o artefato do workflow **Build Android Runtime Test Kit** em Actions.
 
