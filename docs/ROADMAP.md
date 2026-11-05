@@ -13,6 +13,8 @@
 
 ## Marco 1 — Escolha e reprodução da base Java 8
 - [ ] Fixar a origem e o commit exato do código-fonte escolhido.
+- [x] Fazer auditoria estática inicial dos scripts de build, patches e workflow upstream.
+- [ ] Auditar os patches Android por subsistema e revisar linha a linha os componentes críticos.
 - [ ] Auditar licença, avisos e dependências de cada componente.
 - [ ] Resolver uma toolchain de compilação reproduzível para Android ARM64.
 - [ ] Reproduzir a compilação em ambiente isolado; não assumir que a receita antiga funciona.
