@@ -27,6 +27,10 @@ O build pode ser longo e depender de toolchain antiga. Um workflow que falha ou 
 
 A revisão estática inicial está registrada em [OPENJDK8_SOURCE_AUDIT.md](OPENJDK8_SOURCE_AUDIT.md). Foram identificados riscos de fonte não fixada, falhas de patch ignoradas, downloads sem hash, sessão tmate no CI e toolchain histórica. O pipeline upstream não deve ser executado diretamente antes de mitigar esses pontos.
 
+## Revisão dos patches Android
+
+A revisão parcial está em [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md). Foram examinados os diffs pequenos de syscalls/Bionic, `dlvsym`, `loadavg`, AArch32 e page trap. O patch principal `jdk8u_android.diff` tem 2.383.172 bytes; a interface de leitura não disponibilizou seu conteúdo integral, então ele permanece explicitamente pendente. Não foi feita aprovação de GC, JIT, JNI, Java2D ou compatibilidade geral.
+
 ## Próxima entrega técnica
 
 A próxima etapa é uma auditoria de proveniência do código OpenJDK e dos scripts upstream, seguida de um teste de compilação controlado. Só depois disso deve ser criado um workflow de build e publicação de artefatos. Nenhum APK será gerado sem pedido explícito.
