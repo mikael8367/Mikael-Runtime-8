@@ -85,3 +85,14 @@ Ainda é necessário aprofundar os subsistemas que dependem de execução e test
 - [Patch Android AArch64/Linux principal pequeno](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch/blob/buildjre8/patches/jdk8u_android_main.diff)
 - [Patch AArch32](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch/blob/buildjre8/patches/jdk8u_android_aarch32.diff)
 - [Patch page trap](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch/blob/buildjre8/patches/jdk8u_android_page_trap_fix.diff)
+
+## Correção do processo de aplicação (2026-11-05)
+
+A auditoria do workflow encontrou dois defeitos no próprio preflight, que poderiam produzir um diagnóstico falso:
+
+1. O workflow verificava o segundo patch contra a árvore OpenJDK ainda sem o primeiro patch. Patches sequenciais podem depender do estado produzido pelo patch anterior; a validação foi alterada para aplicar o patch principal primeiro e só então verificar/aplicar `jdk8u_android_main.diff`.
+2. A verificação e a aplicação usavam políticas de whitespace diferentes. Agora ambas usam `--whitespace=fix`, e `git diff --check` é executado depois de cada aplicação.
+
+Também foram adicionadas verificações dos Git blob SHAs dos dois patches, para impedir que conteúdo diferente seja usado sob os mesmos nomes.
+
+**Importante:** isso corrige o mecanismo de validação/aplicação, não prova que todos os hunks do patch principal são corretos. A execução do preflight e a compilação real continuam necessárias. O patch AArch32 não deve ser aplicado ao alvo AArch64; o patch page-trap permanece separado e não foi integrado automaticamente, pois altera sincronização sensível do HotSpot.
