@@ -1,0 +1,50 @@
+name: Validate project
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required project files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s docs/ARCHITECTURE.md
+          test -s docs/ROADMAP.md
+          test -s docs/TESTING.md
+          test -s config/minecraft-1.12.2.json
+
+      - name: Validate JSON profile
+        run: python -m json.tool config/minecraft-1.12.2.json > /dev/null
+
+      - name: Check profile safety invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path("config/minecraft-1.12.2.json").read_text())
+          assert profile["javaMajor"] == 8
+          assert profile["architecture"] == "aarch64"
+          assert profile["minecraftVersion"] == "1.12.2"
+          assert profile["status"] == "experimental-profile-only"
+          memory = profile["memory"]
+          assert 256 <= memory["initialHeapMb"] <= memory["maximumHeapMb"]
+          assert memory["maximumHeapMb"] <= 3072
+          assert "-Xms512M" in profile["jvmArguments"]
+          assert "-Xmx1536M" in profile["jvmArguments"]
+          print("Profile checks passed.")
+          PY
