@@ -110,6 +110,8 @@ def validate_jre(root: Path) -> list[str]:
 
 
 def package_jre(root: Path, output: Path) -> None:
+    if not output.name.lower().endswith('.tar.xz'):
+        raise ValueError('CS Launcher Plus runtime must be packaged as a .tar.xz archive.')
     root = root.resolve()
     output = output.resolve()
     errors = validate_jre(root)
@@ -152,6 +154,8 @@ def _archive_member_errors(member_list: list[tarfile.TarInfo]) -> list[str]:
 
 def validate_archive(archive_path: Path) -> list[str]:
     errors: list[str] = []
+    if not archive_path.name.lower().endswith('.tar.xz'):
+        return ['CS Launcher Plus runtime archive must use the .tar.xz extension.']
     try:
         with tarfile.open(archive_path, "r:xz") as archive:
             member_list = archive.getmembers()
