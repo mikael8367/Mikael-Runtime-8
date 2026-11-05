@@ -39,9 +39,12 @@ def _source_tree_errors(root: Path) -> list[str]:
         try:
             if path.is_symlink():
                 try:
-                    path.resolve(strict=False).relative_to(root.resolve(strict=True))
+                    resolved = path.resolve(strict=True)
+                    resolved.relative_to(root.resolve(strict=True))
+                except FileNotFoundError:
+                    errors.append(f"Dangling symlink in JRE directory: {path.relative_to(root)}")
                 except (OSError, RuntimeError, ValueError):
-                    errors.append(f"Symlink escapes JRE directory: {path.relative_to(root)}")
+                    errors.append(f"Symlink escapes or cannot be resolved inside JRE: {path.relative_to(root)}")
             elif not (path.is_file() or path.is_dir()):
                 errors.append(f"Unsupported special file in JRE: {path.relative_to(root)}")
         except OSError as exc:
