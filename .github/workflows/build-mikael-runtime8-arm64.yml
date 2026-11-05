@@ -63,7 +63,7 @@ jobs:
           set -euo pipefail
           python3 scripts/prepare_mojo_openjdk8_build.py --recipe-dir mojo-recipe
           bash -n mojo-recipe/buildjdk.sh
-          for file in clonejdk.sh getlibs.sh maketoolchain.sh tarjdk.sh; do
+          for file in clonejdk.sh getlibs.sh maketoolchain.sh tarjdk.sh buildlibs.sh smoke_test_android_toolchain.sh ci_build_global.sh; do
             bash -n "mojo-recipe/$file"
           done
           if grep -R -nE 'git apply --reject|action-tmate|\|\| echo' mojo-recipe/buildjdk.sh mojo-recipe/.github/workflows/build.yml; then
