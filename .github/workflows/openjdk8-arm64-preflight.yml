@@ -7,6 +7,8 @@ on:
       - ".github/workflows/openjdk8-arm64-preflight.yml"
       - "docs/BUILD_STATUS.md"
       - "docs/BASE_SELECTION.md"
+      - "docs/OPENJDK8_ANDROID_PATCH_REVIEW.md"
+      - "docs/OPENJDK8_ARM64_BUILD.md"
 
 permissions:
   contents: read
@@ -64,6 +66,8 @@ jobs:
           git apply --whitespace=fix ../upstream-recipe/patches/jdk8u_android_main.diff
           git diff --check
           test -d hotspot/src/cpu/aarch64
+          git diff --stat | tee ../android-patch-diff-stat.txt
+          git diff --name-only | sort -u | tee ../android-patch-files.txt
           echo "Pinned Android patches applied sequentially with exact blob identities."
       - name: Record source provenance
         if: always()
@@ -77,6 +81,9 @@ jobs:
               echo "Patch status:"
               git -C openjdk status --short
             fi
+            for file in android-patch-diff-stat.txt android-patch-files.txt; do
+              if test -f "$file"; then echo "### $file"; cat "$file"; fi
+            done
           } | tee openjdk-source-preflight.txt
 
       - name: Upload preflight report
@@ -84,6 +91,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: MikaelRuntime8-OpenJDK8-ARM64-Preflight
-          path: openjdk-source-preflight.txt
+          path: |
+            openjdk-source-preflight.txt
+            android-patch-diff-stat.txt
+            android-patch-files.txt
           if-no-files-found: warn
           retention-days: 14
