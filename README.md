@@ -35,7 +35,7 @@ O GitHub Actions executa essas verificações em alterações na branch main.
 
 O perfil JSON não é uma JVM. Uma VM iniciar também não prova que Forge, OptiFine, JNI ou renderização funcionarão. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
 
-Consulte [docs/ROADMAP.md](docs/ROADMAP.md), [docs/BUILD_STATUS.md](docs/BUILD_STATUS.md), [docs/OPENJDK8_SOURCE_AUDIT.md](docs/OPENJDK8_SOURCE_AUDIT.md) e [docs/OPENJDK8_ANDROID_PATCH_REVIEW.md](docs/OPENJDK8_ANDROID_PATCH_REVIEW.md), [docs/OPENJDK8_PATCH_FINDINGS.md](docs/OPENJDK8_PATCH_FINDINGS.md) e [docs/OPENJDK8_PATCH_INVENTORY.md](docs/OPENJDK8_PATCH_INVENTORY.md) para auditorias e estado das etapas.
+Consulte [docs/ROADMAP.md](docs/ROADMAP.md), [docs/BUILD_STATUS.md](docs/BUILD_STATUS.md), [docs/OPENJDK8_SOURCE_AUDIT.md](docs/OPENJDK8_SOURCE_AUDIT.md) e [docs/OPENJDK8_ANDROID_PATCH_REVIEW.md](docs/OPENJDK8_ANDROID_PATCH_REVIEW.md), [docs/OPENJDK8_PATCH_FINDINGS.md](docs/OPENJDK8_PATCH_FINDINGS.md) e [docs/OPENJDK8_PATCH_INVENTORY.md](docs/OPENJDK8_PATCH_INVENTORY.md) e [docs/OPENJDK8_TEST_MATRIX.md](docs/OPENJDK8_TEST_MATRIX.md) para auditorias e estado das etapas.
 
 ## Licenças
 
