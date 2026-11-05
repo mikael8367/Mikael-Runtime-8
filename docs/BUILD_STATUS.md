@@ -58,3 +58,8 @@ Detalhes: [ARM64_REAL_BUILD.md](ARM64_REAL_BUILD.md).
 - [ ] Guardar o próximo latest.log completo e crash report, se houver.
 
 Nenhum APK foi gerado.
+
+
+## Perfil de memória — branch em validação
+
+A branch `memory/android-adaptive-heap` parte de `perf/android-parallel-gc` e adiciona `patches/mikael_android_adaptive_heap.diff`: Android + Parallel GC usa `MaxHeapFreeRatio=85` apenas quando `FLAG_IS_DEFAULT` é verdadeiro; plataformas não Android mantêm 100 e valores explícitos são preservados. O patch não fixa `-Xmx`, `-Xms` ou threads. Testes de regressão verificam o hash e essas condições. Build ARM64 e benchmark de RSS/PSS, heap, GC, FPS e stutter ainda são necessários. Detalhes: [MEMORY_PROFILE.md](MEMORY_PROFILE.md).
