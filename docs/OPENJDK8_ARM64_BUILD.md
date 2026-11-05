@@ -13,6 +13,7 @@ O workflow [OpenJDK 8 ARM64 source preflight](../.github/workflows/openjdk8-arm6
 3. Confirma os SHAs efetivamente baixados.
 4. Verifica e aplica os patches Android com falha fatal; não aceita aplicação parcial.
 5. Confere a presença da árvore de código AArch64 e registra a proveniência em um artefato de diagnóstico.
+6. Audita os SHAs Git dos scripts upstream fixados e identifica operações inseguras sem executar a receita.
 
 Revisões fixadas:
 - Receita Android: `04b90441da7e9649cb6508a037423f08d1fc531f`
@@ -22,12 +23,15 @@ Revisões fixadas:
 
 A receita histórica depende do Android NDK r10e e de bibliotecas nativas antigas. O wrapper original também contém downloads sem verificação de integridade e comandos que ignoram falhas de patch. Não é correto executar esse pipeline integralmente antes de validar a correspondência entre a fonte fixada e os patches.
 
-O workflow atual **não compila a JVM nem produz JRE**. Ele confirma se a combinação de fonte e patches é tecnicamente aplicável. Se falhar, o log deve ser corrigido antes de habilitar a compilação completa.
+O script [audit_openjdk8_recipe.py](../scripts/audit_openjdk8_recipe.py) verifica o commit e os Git blob SHAs de 12 arquivos relevantes da receita histórica. Também registra os riscos encontrados: aplicação de patches tolerante a falhas, clone OpenJDK sem SHA, downloads sem checksum, extração imediata do NDK, tag não imutável do elf-cleaner e sessão tmate no CI upstream.
+
+O workflow atual **não compila a JVM nem produz JRE**. Ele confirma a identidade dos insumos, registra os riscos da receita e verifica se a combinação de fonte e patches é tecnicamente aplicável. Se falhar, o log deve ser corrigido antes de habilitar a compilação completa.
 
 ## Critérios para liberar o build completo
 
 - [ ] A pré-verificação de patches passa sem rejeições.
-- [ ] Fixar e verificar a integridade do NDK r10e e das dependências nativas.
+- [x] Fixar e verificar a identidade dos scripts upstream auditados por Git blob SHA.
+- [ ] Obter e verificar hashes oficiais do NDK r10e e das dependências nativas; não usar downloads sem checksum.
 - [ ] Substituir os passos legados de build por comandos com falha fatal e logs preservados.
 - [ ] Compilar HotSpot Server AArch64 e bibliotecas Java.
 - [ ] Verificar todos os ELF: arquitetura AArch64, ABI Android, API mínima e dependências dinâmicas.
@@ -47,7 +51,7 @@ Nenhum APK é produzido nesta etapa.
 2. Entre em **OpenJDK 8 ARM64 source preflight**.
 3. Abra a execução mais recente e confira se o job `source-preflight` terminou como `success`.
 4. Em **Artifacts**, baixe `MikaelRuntime8-OpenJDK8-ARM64-Preflight`.
-5. Dentro do ZIP, confira `openjdk-source-preflight.txt`, `android-patch-diff-stat.txt` e `android-patch-files.txt`.
+5. Dentro do ZIP, confira `openjdk-upstream-audit.txt`, `openjdk-source-preflight.txt`, `android-patch-diff-stat.txt` e `android-patch-files.txt`.
 
 Se o job falhar, abra o job e copie o trecho do primeiro passo vermelho e o erro completo. Não tente compilar ou instalar os patches manualmente no celular.
 
