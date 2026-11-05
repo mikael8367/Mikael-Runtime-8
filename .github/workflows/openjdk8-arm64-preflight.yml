@@ -9,6 +9,8 @@ on:
       - "docs/BASE_SELECTION.md"
       - "docs/OPENJDK8_ANDROID_PATCH_REVIEW.md"
       - "docs/OPENJDK8_ARM64_BUILD.md"
+      - "scripts/audit_openjdk8_recipe.py"
+      - "tests/test_openjdk8_recipe_audit.py"
 
 permissions:
   contents: read
@@ -36,6 +38,13 @@ jobs:
           git -C upstream-recipe fetch --depth 1 origin 04b90441da7e9649cb6508a037423f08d1fc531f
           git -C upstream-recipe checkout --detach FETCH_HEAD
           test "$(git -C upstream-recipe rev-parse HEAD)" = "04b90441da7e9649cb6508a037423f08d1fc531f"
+
+      - name: Audit pinned upstream recipe without executing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_openjdk8_recipe.py --repo upstream-recipe --output openjdk8-upstream-audit.txt
+          cat openjdk8-upstream-audit.txt
 
       - name: Fetch pinned OpenJDK 8u source
         shell: bash
@@ -75,6 +84,10 @@ jobs:
         run: |
           {
             echo "Recipe commit: 04b90441da7e9649cb6508a037423f08d1fc531f"
+            if test -f openjdk8-upstream-audit.txt; then
+              echo "### Upstream recipe audit"
+              cat openjdk8-upstream-audit.txt
+            fi
             echo "OpenJDK commit: 7fdf5cd77f209427758437d7e147ea1c18b4ec35"
             if test -d openjdk/.git; then
               echo "OpenJDK HEAD: $(git -C openjdk rev-parse HEAD)"
@@ -95,5 +108,6 @@ jobs:
             openjdk-source-preflight.txt
             android-patch-diff-stat.txt
             android-patch-files.txt
+            openjdk8-upstream-audit.txt
           if-no-files-found: warn
           retention-days: 14
