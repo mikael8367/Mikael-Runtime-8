@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import lzma
+import posixpath
 import re
 import sys
 import tarfile
@@ -32,16 +33,34 @@ def read_elf_header(path: Path) -> bytes:
         return stream.read(64)
 
 
+def _source_tree_errors(root: Path) -> list[str]:
+    errors: list[str] = []
+    for path in root.rglob("*"):
+        try:
+            if path.is_symlink():
+                try:
+                    path.resolve(strict=False).relative_to(root.resolve(strict=True))
+                except (OSError, RuntimeError, ValueError):
+                    errors.append(f"Symlink escapes JRE directory: {path.relative_to(root)}")
+            elif not (path.is_file() or path.is_dir()):
+                errors.append(f"Unsupported special file in JRE: {path.relative_to(root)}")
+        except OSError as exc:
+            errors.append(f"Cannot inspect {path.relative_to(root)}: {exc}")
+    return errors
+
+
 def validate_jre(root: Path) -> list[str]:
     errors: list[str] = []
     if not root.is_dir():
         return [f"JRE directory does not exist: {root}"]
+    root = root.resolve()
+    errors.extend(_source_tree_errors(root))
 
     release = root / "release"
     java = root / "bin" / "java"
     lib = root / "lib"
-    if not release.is_file():
-        errors.append("Missing release file at JRE root.")
+    if not release.is_file() or release.is_symlink():
+        errors.append("Missing regular release file at JRE root.")
         release_text = ""
     else:
         release_text = release.read_text(encoding="utf-8", errors="replace")
@@ -57,19 +76,19 @@ def validate_jre(root: Path) -> list[str]:
     elif arch_match.group(1).lower() not in {"aarch64", "arm64"}:
         errors.append(f"Expected ARM64 OS_ARCH, found {arch_match.group(1)!r}.")
 
-    if not java.is_file():
-        errors.append("Missing bin/java executable.")
+    if not java.is_file() or java.is_symlink():
+        errors.append("Missing regular bin/java executable.")
     else:
         if not java.stat().st_mode & 0o111:
             errors.append("bin/java is not marked executable.")
         else:
             errors.extend(elf_errors(read_elf_header(java), "bin/java"))
 
-    if not lib.is_dir():
-        errors.append("Missing lib directory.")
+    if not lib.is_dir() or lib.is_symlink():
+        errors.append("Missing regular lib directory.")
         native_files = []
     else:
-        native_files = [p for p in lib.rglob("*.so") if p.is_file()]
+        native_files = [p for p in lib.rglob("*.so") if p.is_file() and not p.is_symlink()]
         if not native_files:
             errors.append("No native .so libraries found under lib/.")
 
@@ -100,11 +119,34 @@ def package_jre(root: Path, output: Path) -> None:
             archive.add(path, arcname=path.relative_to(root).as_posix(), recursive=False)
 
 
+def _archive_member_errors(member_list: list[tarfile.TarInfo]) -> list[str]:
+    errors: list[str] = []
+    seen: set[str] = set()
+    for member in member_list:
+        name = member.name
+        path = PurePosixPath(name)
+        if name in seen:
+            errors.append(f"Duplicate archive path: {name}")
+        seen.add(name)
+        if not name or path.is_absolute() or ".." in path.parts or "." in path.parts or "\\\\" in name:
+            errors.append(f"Unsafe archive path: {name}")
+        if not (member.isfile() or member.isdir() or member.issym()):
+            errors.append(f"Unsupported archive entry type: {name}")
+        if member.issym():
+            target = member.linkname
+            resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target))
+            if not target or target.startswith("/") or resolved == ".." or resolved.startswith("../"):
+                errors.append(f"Symlink escapes archive root: {name} -> {target}")
+    return errors
+
+
 def validate_archive(archive_path: Path) -> list[str]:
     errors: list[str] = []
     try:
         with tarfile.open(archive_path, "r:xz") as archive:
-            members = {m.name: m for m in archive.getmembers()}
+            member_list = archive.getmembers()
+            errors.extend(_archive_member_errors(member_list))
+            members = {m.name: m for m in member_list}
             for name in members:
                 path = PurePosixPath(name)
                 if path.is_absolute() or ".." in path.parts:
