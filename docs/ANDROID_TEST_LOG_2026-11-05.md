@@ -21,17 +21,19 @@ A biblioteca nativa temporária foi extraída em armazenamento compartilhado:
 
 O Android linker namespace bloqueou o carregamento desse caminho. O log não aponta falha da JVM: o aviso ocorreu depois de Forge/OptiFine carregarem e o jogo continuou até abrir o mundo.
 
-### Correção a testar no launcher
+### Correção aplicada no fork do launcher
 
-O diretório temporário de JNA deve ficar em armazenamento privado gravável pelo processo do CS Launcher Plus, não em `/storage/emulated/0`. Se o launcher permitir argumentos JVM personalizados, testar:
+Foi aplicado no repositório `mikael8367/CS-LAUNCHER-PLUS-fork`, em `JREUtils.getJavaArgs()`, o argumento:
 
 ```
--Djna.tmpdir=/data/user/0/com.craftstudio.cslauncher/cache
+-Djna.tmpdir=<Tools.DIR_CACHE>
 ```
 
-Antes de considerar resolvido, confirmar no novo log que o caminho de extração JNA está dentro do diretório privado e que o aviso desapareceu. Se o launcher sobrescrever a propriedade ou não permitir esse argumento, a correção deve ser feita no código do launcher que define o diretório temporário/cache. Não alterar permissões do linker namespace nem tentar carregar bibliotecas nativas de caminhos compartilhados.
+`Tools.DIR_CACHE` vem de `Context.getCacheDir()`, portanto é o cache privado do aplicativo. O launcher já definia `java.io.tmpdir` e `jna.boot.library.path`; faltava definir explicitamente o diretório usado pelo JNA para extrair bibliotecas temporárias. Commit: [c5a544c](https://github.com/mikael8367/CS-LAUNCHER-PLUS-fork/commit/c5a544cf13c6f60a61ef55ddc65a652ea51ed1ad).
 
-Esta é uma configuração do launcher/JNA; não há evidência de que mudar o binário HotSpot resolva o bloqueio.
+**Ainda precisa ser validado no aparelho:** compilar/instalar uma versão do launcher com esse commit e confirmar no próximo log que o JNA extrai em cache privado e que o aviso desapareceu. Não alterar permissões do linker namespace nem tentar carregar bibliotecas nativas de caminhos compartilhados.
+
+Esta correção é no launcher/JNA; não exige mudar o binário HotSpot.
 
 ## Problema 2 — atrasos do servidor integrado
 
