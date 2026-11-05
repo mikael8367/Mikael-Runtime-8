@@ -1,6 +1,6 @@
+import tarfile
 import tempfile
 import unittest
-import tarfile
 from pathlib import Path
 
 from scripts.package_cslauncher_runtime import package_jre, validate_archive, validate_jre
@@ -8,7 +8,7 @@ from scripts.package_cslauncher_runtime import package_jre, validate_archive, va
 
 def fake_elf(machine=183, elf_class=2):
     header = bytearray(64)
-    header[:4] = b"\\x7fELF"
+    header[:4] = b"\x7fELF"
     header[4] = elf_class
     header[5] = 1
     header[6] = 1
@@ -21,7 +21,7 @@ class CsLauncherPackageTests(unittest.TestCase):
         (root / "bin").mkdir(parents=True)
         (root / "lib" / "server").mkdir(parents=True)
         (root / "release").write_text(
-            'JAVA_VERSION="1.8.0_442"\\nOS_ARCH="aarch64"\\n', encoding="utf-8"
+            'JAVA_VERSION="1.8.0_442"\nOS_ARCH="aarch64"\n', encoding="utf-8"
         )
         java = root / "bin" / "java"
         java.write_bytes(fake_elf(machine))
@@ -37,7 +37,7 @@ class CsLauncherPackageTests(unittest.TestCase):
             root = Path(tmp) / "jre"
             self.make_fake_jre(root)
             (root / "release").write_text(
-                'JAVA_VERSION="1.8.0_442"\\nOS_ARCH="x86_64"\\n', encoding="utf-8"
+                'JAVA_VERSION="1.8.0_442"\nOS_ARCH="x86_64"\n', encoding="utf-8"
             )
             self.assertTrue(any("ARM64" in e for e in validate_jre(root)))
 
@@ -52,7 +52,7 @@ class CsLauncherPackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
             self.make_fake_jre(root)
-            (root / "bin" / "java").write_text("#!/bin/sh\\n", encoding="utf-8")
+            (root / "bin" / "java").write_text("#!/bin/sh\n", encoding="utf-8")
             self.assertTrue(any("valid ELF" in e for e in validate_jre(root)))
 
     def test_packages_root_layout_and_validates_elf(self):
