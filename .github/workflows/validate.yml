@@ -17,6 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Validate required project files
         shell: bash
         run: |
@@ -26,25 +31,14 @@ jobs:
           test -s docs/ROADMAP.md
           test -s docs/TESTING.md
           test -s config/minecraft-1.12.2.json
+          test -s scripts/validate_profile.py
+          test -s tests/test_profile.py
 
-      - name: Validate JSON profile
+      - name: Validate JSON syntax
         run: python -m json.tool config/minecraft-1.12.2.json > /dev/null
 
-      - name: Check profile safety invariants
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
+      - name: Validate profile rules
+        run: python scripts/validate_profile.py
 
-          profile = json.loads(Path("config/minecraft-1.12.2.json").read_text())
-          assert profile["javaMajor"] == 8
-          assert profile["architecture"] == "aarch64"
-          assert profile["minecraftVersion"] == "1.12.2"
-          assert profile["status"] == "experimental-profile-only"
-          memory = profile["memory"]
-          assert 256 <= memory["initialHeapMb"] <= memory["maximumHeapMb"]
-          assert memory["maximumHeapMb"] <= 3072
-          assert "-Xms512M" in profile["jvmArguments"]
-          assert "-Xmx1536M" in profile["jvmArguments"]
-          print("Profile checks passed.")
-          PY
+      - name: Run regression tests
+        run: python -m unittest discover -s tests -v
