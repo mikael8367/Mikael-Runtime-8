@@ -44,6 +44,8 @@ fi'''
         script = smoke_test_script()
         self.assertIn('"$compiler" -v', script)
         self.assertIn('${BUILD_IOS:-0}', script)
+        self.assertNotIn('if [[ "$BUILD_IOS"', script)
+        self.assertNotIn('\\n  echo', script)
         self.assertIn('-print-file-name=', script)
         self.assertIn('-fPIE -pie', script)
         self.assertIn("grep -q 'AArch64'", script)
