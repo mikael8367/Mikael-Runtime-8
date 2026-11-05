@@ -120,6 +120,12 @@ if [[ "${BUILD_IOS:-0}" == "1" ]]; then
   echo "Android toolchain smoke test skipped for iOS build."
   exit 0
 fi
+glibc_version="$(getconf GNU_LIBC_VERSION | awk '{print $2}')"
+echo "Host GLIBC: $glibc_version"
+if [[ "$(printf '2.38\\n%s\\n' "$glibc_version" | sort -V | head -n 1)" != "2.38" ]]; then
+  echo "Pinned GCC 13 toolchain requires host GLIBC >= 2.38." >&2
+  exit 1
+fi
 compiler="$TOOLCHAIN/bin/$TARGET-gcc"
 test -x "$compiler"
 echo "=== Cross compiler identity ==="
