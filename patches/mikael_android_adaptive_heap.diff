@@ -1,0 +1,15 @@
+diff --git a/hotspot/src/share/vm/runtime/arguments.cpp b/hotspot/src/share/vm/runtime/arguments.cpp
+--- a/hotspot/src/share/vm/runtime/arguments.cpp
++++ b/hotspot/src/share/vm/runtime/arguments.cpp
+@@ -1665,7 +1665,11 @@ void Arguments::set_parallel_gc_flags() {
+     }
+     if (FLAG_IS_DEFAULT(MaxHeapFreeRatio)) {
++#ifdef __ANDROID__
++      // Reclaim unusually idle heap after bursts, without shrinking during normal load.
++      FLAG_SET_DEFAULT(MaxHeapFreeRatio, 85);
++#else
+       FLAG_SET_DEFAULT(MaxHeapFreeRatio, 100);
++#endif
+       _max_heap_free_ratio = MaxHeapFreeRatio;
+     }
+   }
