@@ -12,7 +12,8 @@ O projeto já possui documentação técnica, um perfil experimental para Minecr
 - scripts/validate_profile.py: valida versão, arquitetura, heap e argumentos JVM.
 - tests/test_profile.py: testes de regressão do validador.
 - .github/workflows/validate.yml: validação automática do projeto.
-- docs/: arquitetura, seleção da base, formato do perfil, testes e roadmap.
+- docs/: arquitetura, seleção da base, formato do perfil, testes, roadmap e compatibilidade com CS Launcher Plus.
+- scripts/package_cslauncher_runtime.py: valida e empacota uma JRE Java 8 ARM64 no formato MultiRT do CS Launcher Plus.
 
 ## Validar
 
