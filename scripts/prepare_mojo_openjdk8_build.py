@@ -155,7 +155,7 @@ def inject_toolchain_smoke_test(global_text: str) -> str:
         )
     index = matches[0]
     newline = "\r\n" if lines[index].endswith("\r\n") else "\n"
-    lines.insert(index + 1, "  ./smoke_test_android_toolchain.sh" + newline)
+    lines.insert(index + 1, "  bash ./smoke_test_android_toolchain.sh" + newline)
     return "".join(lines)
 
 def strict_patch_block() -> str:
