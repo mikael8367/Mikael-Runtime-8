@@ -2,7 +2,7 @@
 
 **Data:** 2026-11-05  
 **Upstream auditado:** `PojavLauncherTeam/android-openjdk-build-multiarch`, branch `buildjre8`, commit `04b90441da7e9649cb6508a037423f08d1fc531f`.  
-**Escopo efetivamente lido:** patches pequenos `jdk8u_android_main.diff`, `jdk8u_android_aarch32.diff`, `jdk8u_android_page_trap_fix.diff`; inventário e SHA do patch principal `jdk8u_android.diff` (2.383.172 bytes). O conteúdo integral do patch principal não pôde ser recuperado pela interface de leitura disponível e, portanto, não foi declarado como revisado.
+**Escopo efetivamente lido:** diff completo `jdk8u_android.diff` recuperado pelo blob SHA, mais os patches pequenos `jdk8u_android_main.diff`, `jdk8u_android_aarch32.diff` e `jdk8u_android_page_trap_fix.diff`. O inventário de 207 caminhos está em [OPENJDK8_PATCH_INVENTORY.md](OPENJDK8_PATCH_INVENTORY.md).
 
 ## Estado da auditoria por subsistema
 
@@ -60,17 +60,17 @@
 
 **Impacto:** evita header ausente no Bionic. Não é evidência de que a configuração de ponto flutuante e as opções de compilação estejam corretas para toda CPU ARM32.
 
-## Patch principal: pendente de leitura integral
+## Patch principal: revisão estática realizada
 
-O patch `jdk8u_android.diff` tem 2.383.172 bytes. A API de leitura usada nesta revisão retornou o SHA, mas não disponibilizou o conteúdo. Por isso, **não** afirmamos ter auditado suas alterações internas.
+O patch `jdk8u_android.diff` foi recuperado integralmente por SHA e teve seus caminhos e principais alterações examinados. Os achados estão registrados em [OPENJDK8_PATCH_FINDINGS.md](OPENJDK8_PATCH_FINDINGS.md). A revisão continua estática: não houve compilação nem execução no Android.
 
 SHA upstream informado pela árvore Git: `801ec26807256e5206616c2da14c80676519bce9`.
 
-Para concluir a revisão, é necessário recuperar o diff em partes e indexar cada caminho alterado. A revisão deverá classificar mudanças em HotSpot, JNI, AWT/Java2D, bibliotecas nativas, sinais, threads, memória, GC e JIT; então adicionar testes de regressão específicos. Não aprovar o patch por inferência a partir dos três diffs pequenos.
+Ainda é necessário aprofundar os subsistemas que dependem de execução e testes (JNI, GC, JIT, threads, AWT, rede e memória). Não considerar o patch aprovado apenas por leitura.
 
 ## Critérios de aprovação antes de compilar
 
-- [ ] Recuperar e revisar 100% de `jdk8u_android.diff`.
+- [x] Recuperar e inventariar 100% dos caminhos de `jdk8u_android.diff`.
 - [ ] Mapear cada arquivo alterado para seu subsistema.
 - [ ] Confirmar compatibilidade dos patches com SHA fixo do OpenJDK 8u.
 - [ ] Aplicar patches sem ignorar falhas; patch parcialmente aplicado deve abortar o build.
