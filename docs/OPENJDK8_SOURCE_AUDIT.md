@@ -94,6 +94,10 @@ O projeto Pojav é uma receita histórica para portar OpenJDK 8 a Android, inclu
 
 O diff principal foi recuperado integralmente por SHA. Seu inventário tem 207 caminhos, 58.398 linhas adicionadas e 114 removidas. A revisão e os achados estão em [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md), [OPENJDK8_PATCH_FINDINGS.md](OPENJDK8_PATCH_FINDINGS.md) e [OPENJDK8_PATCH_INVENTORY.md](OPENJDK8_PATCH_INVENTORY.md). O patch não foi aprovado para integração direta.
 
+## Atualização do patch principal
+
+O diff principal foi recuperado integralmente por SHA. Seu inventário contém 207 caminhos, 58.398 linhas adicionadas e 114 removidas. A revisão e os achados estão em [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md), [OPENJDK8_PATCH_FINDINGS.md](OPENJDK8_PATCH_FINDINGS.md) e [OPENJDK8_PATCH_INVENTORY.md](OPENJDK8_PATCH_INVENTORY.md). O patch não está aprovado para integração direta.
+
 ## Próximas ações de engenharia
 
 1. Corrigir os achados registrados em OPENJDK8_PATCH_FINDINGS.md e adicionar testes de regressão.
