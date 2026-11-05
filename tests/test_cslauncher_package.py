@@ -65,6 +65,13 @@ class CsLauncherPackageTests(unittest.TestCase):
             (root / "lib" / "server" / "escape.so").symlink_to(external)
             self.assertTrue(any("Symlink escapes" in e for e in validate_jre(root)))
 
+    def test_rejects_dangling_symlink(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "jre"
+            self.make_fake_jre(root)
+            (root / "lib" / "server" / "dangling.so").symlink_to("missing.so")
+            self.assertTrue(any("Dangling symlink" in e for e in validate_jre(root)))
+
     def test_packages_root_layout_and_validates_elf(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
@@ -83,6 +90,17 @@ class CsLauncherPackageTests(unittest.TestCase):
                 archive.addfile(info)
             errors = validate_archive(output)
             self.assertTrue(any("Symlink escapes archive root" in e for e in errors))
+
+    def test_rejects_duplicate_archive_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "duplicate.tar.xz"
+            with tarfile.open(output, "w:xz") as archive:
+                for _ in range(2):
+                    info = tarfile.TarInfo("release")
+                    info.size = 1
+                    archive.addfile(info, fileobj=__import__("io").BytesIO(b"x"))
+            errors = validate_archive(output)
+            self.assertTrue(any("Duplicate archive path" in e for e in errors))
 
     def test_rejects_archive_hardlink(self):
         with tempfile.TemporaryDirectory() as tmp:
