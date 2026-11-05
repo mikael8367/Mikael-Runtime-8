@@ -15,9 +15,10 @@
 - [ ] Fixar a origem e o commit exato do código-fonte escolhido.
 - [x] Fazer auditoria estática inicial dos scripts de build, patches e workflow upstream.
 - [x] Fazer revisão parcial dos três patches Android pequenos acessíveis.
-- [ ] Recuperar e revisar integralmente o patch Android principal (2,38 MB).
-- [ ] Auditar JNI, GC, JIT, Java2D, threads, sinais e memória com testes específicos.
-- [ ] Auditar licença, avisos e dependências de cada componente e gerar inventário/SBOM.
+- [x] Recuperar e inventariar integralmente o patch Android principal (207 caminhos).
+- [x] Fazer revisão estática inicial dos principais subsistemas e registrar achados.
+- [ ] Executar testes específicos de JNI, GC, JIT, Java2D, threads, sinais, rede e memória.
+- [ ] Auditar licenças e avisos de OpenJDK, ICU, Android e demais dependências; gerar SBOM.
 - [ ] Resolver uma toolchain de compilação reproduzível para Android ARM64.
 - [ ] Reproduzir a compilação em ambiente isolado; não assumir que a receita antiga funciona.
 - [ ] Registrar hashes e proveniência dos artefatos gerados.
