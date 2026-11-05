@@ -17,6 +17,8 @@ O projeto já possui documentação técnica, um perfil experimental para Minecr
 - docs/MOD_COMPATIBILITY.md: requisitos do classpath, JNI, LWJGL, OptiFine e testes por etapas.
 - docs/: arquitetura, seleção da base, formato do perfil, testes, roadmap e compatibilidade com CS Launcher Plus.
 - scripts/package_cslauncher_runtime.py: valida e empacota uma JRE Java 8 ARM64 no formato MultiRT do CS Launcher Plus.
+- tests/device-smoke/: teste Java 8 para verificar uma runtime no próprio Android.
+- .github/workflows/build-test-kit.yml: compila e publica um kit de diagnóstico para baixar pelo celular.
 
 ## Validar
 
@@ -36,7 +38,9 @@ O GitHub Actions executa essas verificações em alterações na branch main.
 
 ## Limitações importantes
 
-O perfil e o contrato de compatibilidade não são uma JVM. O projeto define Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste, mas ainda não executou esses componentes com uma runtime própria. A VM, JNI, classpath, bibliotecas LWJGL e renderização precisam ser validados em Android real. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
+O kit de diagnóstico também não é uma JVM: ele serve para testar uma runtime Java 8 que já esteja instalada. A Mikael Runtime 8 ainda não possui binário próprio para selecionar no launcher. O perfil e o contrato de compatibilidade não são uma JVM. O projeto define Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste, mas ainda não executou esses componentes com uma runtime própria. A VM, JNI, classpath, bibliotecas LWJGL e renderização precisam ser validados em Android real. A base OpenJDK e a toolchain Android ainda precisam ser selecionadas, auditadas e compiladas.
+
+Para testar uma runtime existente no celular, siga [tests/device-smoke/ANDROID_TEST_GUIDE.md](tests/device-smoke/ANDROID_TEST_GUIDE.md) e baixe o artefato do workflow **Build Android Runtime Test Kit** em Actions.
 
 Consulte [docs/ROADMAP.md](docs/ROADMAP.md), [docs/BUILD_STATUS.md](docs/BUILD_STATUS.md), [docs/OPENJDK8_SOURCE_AUDIT.md](docs/OPENJDK8_SOURCE_AUDIT.md) e [docs/OPENJDK8_ANDROID_PATCH_REVIEW.md](docs/OPENJDK8_ANDROID_PATCH_REVIEW.md), [docs/OPENJDK8_PATCH_FINDINGS.md](docs/OPENJDK8_PATCH_FINDINGS.md) e [docs/OPENJDK8_PATCH_INVENTORY.md](docs/OPENJDK8_PATCH_INVENTORY.md) e [docs/OPENJDK8_TEST_MATRIX.md](docs/OPENJDK8_TEST_MATRIX.md), [docs/MOD_COMPATIBILITY.md](docs/MOD_COMPATIBILITY.md) e [config/compatibility-minecraft-1.12.2.json](config/compatibility-minecraft-1.12.2.json) para auditorias, compatibilidade e estado das etapas.
 
