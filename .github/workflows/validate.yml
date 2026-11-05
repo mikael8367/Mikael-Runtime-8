@@ -37,9 +37,11 @@ jobs:
           test -s scripts/validate_profile.py
           test -s scripts/validate_compatibility.py
           test -s scripts/package_cslauncher_runtime.py
+          test -s scripts/audit_openjdk8_recipe.py
           test -s tests/test_profile.py
           test -s tests/test_compatibility.py
           test -s tests/test_cslauncher_package.py
+          test -s tests/test_openjdk8_recipe_audit.py
 
       - name: Validate JSON syntax
         run: |
