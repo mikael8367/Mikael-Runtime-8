@@ -6,7 +6,7 @@ Reduzir a memória Java comprometida que permanece ociosa depois de picos de alo
 
 ## Alteração no HotSpot
 
-O patch `mikael_android_adaptive_heap.diff` modifica somente a ergonomia do Parallel GC em builds Android:
+O patch `mikael_android_adaptive_heap.diff` (Git blob SHA `a1ef6110308229e06588763db33f17a701c91c35`) modifica somente a ergonomia do Parallel GC em builds Android:
 
 - Se `UseAdaptiveSizePolicy` estiver ativo e `MaxHeapFreeRatio` não tiver sido definido explicitamente, o padrão Android passa de 100 para 85.
 - Fora do Android, o valor original 100 é mantido.
