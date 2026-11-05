@@ -21,6 +21,8 @@ class PrepareMojoBuildTests(unittest.TestCase):
         self.assertIn("6a2b3e4007e794bfc6c91030d0ed987f925164a8", scripts["getlibs.sh"])
         self.assertIn("070e33a4c9dfdb21638de0fedb2904391c30d070", scripts["getlibs.sh"])
         self.assertIn(GCC_SHA256, scripts["maketoolchain.sh"])
+        self.assertIn(': "${BUILD_IOS:=0}"', scripts["maketoolchain.sh"])
+        self.assertIn(': "${BUILD_IOS:=0}"', scripts["tarjdk.sh"])
         self.assertIn("d08dfdc73ff5b6061e134b90bec16489655015f5", scripts["tarjdk.sh"])
         self.assertIn("\n", scripts["clonejdk.sh"])
         self.assertIn("tr -d '[:space:]'", scripts["tarjdk.sh"])
