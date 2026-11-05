@@ -45,6 +45,8 @@ fi'''
         self.assertIn('"$compiler" -v', script)
         self.assertIn("getconf GNU_LIBC_VERSION", script)
         self.assertIn("2.38", script)
+        self.assertIn("split(version, v, /\\./)", script)
+        self.assertIn("v[2] >= 38", script)
         self.assertIn('${BUILD_IOS:-0}', script)
         self.assertNotIn('if [[ "$BUILD_IOS"', script)
         self.assertNotIn('\\n  echo', script)
