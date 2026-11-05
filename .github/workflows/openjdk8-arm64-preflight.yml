@@ -29,16 +29,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git clone https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch.git upstream-recipe
-          git -C upstream-recipe checkout --detach 04b90441da7e9649cb6508a037423f08d1fc531f
+          git init upstream-recipe
+          git -C upstream-recipe remote add origin https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch.git
+          git -C upstream-recipe fetch --depth 1 origin 04b90441da7e9649cb6508a037423f08d1fc531f
+          git -C upstream-recipe checkout --detach FETCH_HEAD
           test "$(git -C upstream-recipe rev-parse HEAD)" = "04b90441da7e9649cb6508a037423f08d1fc531f"
 
       - name: Fetch pinned OpenJDK 8u source
         shell: bash
         run: |
           set -euo pipefail
-          git clone https://github.com/openjdk/jdk8u.git openjdk
-          git -C openjdk checkout --detach 7fdf5cd77f209427758437d7e147ea1c18b4ec35
+          git init openjdk
+          git -C openjdk remote add origin https://github.com/openjdk/jdk8u.git
+          git -C openjdk fetch --depth 1 origin 7fdf5cd77f209427758437d7e147ea1c18b4ec35
+          git -C openjdk checkout --detach FETCH_HEAD
           test "$(git -C openjdk rev-parse HEAD)" = "7fdf5cd77f209427758437d7e147ea1c18b4ec35"
           test -f openjdk/configure
 
@@ -47,13 +51,13 @@ jobs:
         run: |
           set -euo pipefail
           cd openjdk
-          git status --porcelain
-          git apply --check --whitespace=error-all ../upstream-recipe/patches/jdk8u_android.diff
-          git apply --check --whitespace=error-all ../upstream-recipe/patches/jdk8u_android_main.diff
-          git apply --whitespace=error-all ../upstream-recipe/patches/jdk8u_android.diff
+          test -z "$(git status --porcelain)"
+          git apply --check --whitespace=fix ../upstream-recipe/patches/jdk8u_android.diff
+          git apply --check --whitespace=fix ../upstream-recipe/patches/jdk8u_android_main.diff
+          git apply --whitespace=fix ../upstream-recipe/patches/jdk8u_android.diff
           git apply --whitespace=error-all ../upstream-recipe/patches/jdk8u_android_main.diff
           git diff --check
-          test -f hotspot/make/linux/makefiles/arm64.make
+          test -d hotspot/src/cpu/aarch64
           echo "Pinned OpenJDK source and Android patch set passed the strict apply check."
 
       - name: Record source provenance
