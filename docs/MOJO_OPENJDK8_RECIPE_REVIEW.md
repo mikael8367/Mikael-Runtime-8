@@ -31,8 +31,8 @@ A atualização do fork não removeu automaticamente os riscos de segurança/rep
 1. `buildjdk.sh` ainda usa `git apply --reject` e tolera falhas com `|| echo`; isso pode deixar uma árvore parcialmente patchada.
 2. `clonejdk.sh` ainda clona `openjdk/jdk8u` sem fixar um commit.
 3. `getlibs.sh` baixa FreeType e CUPS sem validar SHA-256 ou assinatura.
-4. `ci_build_global.sh` baixa o NDK sem checksum e o extrai imediatamente.
-5. `tarjdk.sh` clona `termux-elf-cleaner` por tag, sem fixar o commit.
+4. `setdevkitpath.sh` seleciona NDK r10e, mas o workflow/`ci_build_global.sh` não mostra uma etapa explícita que forneça esse NDK ao diretório esperado; isso é um bloqueio de reprodução.
+5. `maketoolchain.sh` baixa o GCC toolchain pré-compilado sem checksum; `tarjdk.sh` clona `termux-elf-cleaner` por tag, sem fixar o commit.
 6. O workflow ainda inicia uma sessão tmate quando o job falha.
 7. O NDK r10e e a API 21 são uma toolchain histórica; a compilação deve ser reproduzida e os ELF resultantes precisam ser auditados para Android/Bionic.
 

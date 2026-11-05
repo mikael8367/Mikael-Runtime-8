@@ -8,7 +8,7 @@ Preparar uma JRE Java 8 Android `arm64-v8a` para a Mikael Runtime 8. O alvo inic
 
 O candidato prioritário passou a ser o fork ativo [MojoLauncher/android-openjdk-build-multiarch](https://github.com/MojoLauncher/android-openjdk-build-multiarch), commit observado `a0d811b6c5ebd251374751438ec8b635f0746ab4`. Ele possui workflow AArch64 e publicação de JRE 8 de referência. A revisão completa está em [MOJO_OPENJDK8_RECIPE_REVIEW.md](MOJO_OPENJDK8_RECIPE_REVIEW.md).
 
-O fork atualiza a receita histórica, mas ainda mantém pontos que bloqueiam a execução direta: patches com `--reject` e falhas toleradas, clone OpenJDK sem SHA, downloads sem checksum, ferramenta elf-cleaner por tag e tmate no CI. O workflow [Audit maintained OpenJDK 8 ARM64 recipe](../.github/workflows/audit-mojo-openjdk8.yml) verifica a identidade dos scripts e relata esses riscos sem executá-los.
+O fork atualiza a receita histórica, mas ainda mantém pontos que bloqueiam a execução direta: patches com `--reject` e falhas toleradas, clone OpenJDK sem SHA, downloads de dependências/toolchain sem checksum, NDK r10e sem provisionamento explícito visível no workflow, ferramenta elf-cleaner por tag e tmate no CI. O workflow [Audit maintained OpenJDK 8 ARM64 recipe](../.github/workflows/audit-mojo-openjdk8.yml) verifica a identidade dos scripts e relata esses riscos sem executá-los.
 
 ## Pré-verificação de fonte e patches
 
@@ -18,7 +18,7 @@ O workflow [OpenJDK 8 ARM64 source preflight](../.github/workflows/openjdk8-arm6
 
 - [ ] Fixar a receita e todos os scripts por commit/blob SHA.
 - [ ] Fixar o commit exato do OpenJDK 8u.
-- [ ] Obter e validar SHA-256 oficial do NDK e das dependências.
+- [ ] Provisionar NDK r10e explicitamente e validar SHA-256 oficial do NDK, FreeType, CUPS e GCC toolchain.
 - [ ] Substituir aplicação de patch tolerante por `git apply --check` + aplicação fatal.
 - [ ] Remover tmate e qualquer execução interativa do CI.
 - [ ] Reproduzir a toolchain histórica em ambiente isolado.

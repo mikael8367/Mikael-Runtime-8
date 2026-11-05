@@ -13,8 +13,8 @@ O fork mantém workflow para compilar OpenJDK 8 para AArch64 e publicar um JRE d
 A receita atual ainda:
 - tolera falhas na aplicação de patches com `git apply --reject` e `|| echo`;
 - clona OpenJDK sem fixar commit;
-- baixa FreeType/CUPS e NDK sem checksum verificado;
-- extrai o NDK imediatamente após download;
+- baixa FreeType/CUPS e o GCC toolchain sem checksum verificado;
+- seleciona NDK r10e, mas não mostra provisionamento explícito dele no workflow/`ci_build_global.sh`;
 - baixa `termux-elf-cleaner` por tag, não commit;
 - inicia tmate em falha do workflow;
 - depende de NDK r10e/API 21, uma toolchain histórica.

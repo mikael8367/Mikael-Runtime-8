@@ -8,7 +8,7 @@ Ainda não existe binário JVM/JRE produzido neste repositório. O pipeline atua
 
 Foi identificado o fork ativo `MojoLauncher/android-openjdk-build-multiarch`, commit observado `a0d811b6c5ebd251374751438ec8b635f0746ab4`. Ele contém workflow de compilação OpenJDK 8 para AArch64 e publica um pacote JRE 8 de referência. Detalhes e riscos em [MOJO_OPENJDK8_RECIPE_REVIEW.md](MOJO_OPENJDK8_RECIPE_REVIEW.md).
 
-A receita ainda tolera falhas de patch, clona OpenJDK sem SHA, baixa NDK e dependências sem verificação SHA-256 e inicia tmate no CI. A auditoria automatizada foi adicionada, mas não executa esses scripts. Portanto, a descoberta não libera o build completo.
+A receita ainda tolera falhas de patch, clona OpenJDK sem SHA, baixa FreeType/CUPS e o GCC toolchain sem verificação SHA-256, não mostra provisionamento explícito do NDK r10e e inicia tmate no CI. A auditoria automatizada foi adicionada, mas não executa esses scripts. Portanto, a descoberta não libera o build completo.
 
 ## Pré-verificação e auditorias
 
@@ -25,7 +25,7 @@ O workflow `.github/workflows/build-test-kit.yml` compila um JAR de diagnóstico
 
 ## Bloqueios para uma runtime própria válida
 
-1. Corrigir a receita Mojo: pin do OpenJDK, checksums oficiais, patches fatais e remoção de tmate.
+1. Corrigir a receita Mojo: pin do OpenJDK, provisionamento e checksum do NDK r10e, checksums oficiais das dependências/toolchain, patches fatais e remoção de tmate.
 2. Reproduzir toolchain NDK r10e/API 21 em ambiente isolado e documentar a compatibilidade com Android 12/Bionic.
 3. Compilar HotSpot Server AArch64 e bibliotecas Java.
 4. Auditar ELF, símbolos, dependências dinâmicas e API mínima.

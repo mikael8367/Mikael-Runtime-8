@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit the currently maintained MojoLauncher OpenJDK 8 Android build recipe."""
+"""Audit the exact MojoLauncher OpenJDK 8 Android ARM64 build recipe."""
 from __future__ import annotations
 
 import argparse
@@ -9,15 +9,16 @@ from pathlib import Path
 
 PINNED_COMMIT = "a0d811b6c5ebd251374751438ec8b635f0746ab4"
 EXPECTED_BLOBS = {
-    ".github/workflows/build.yml": "0341c899c368dd3021f175ee98fbaa7004f17742",
+    ".github/workflows/build.yml": "f54f8c9ff52a6f5b7aef638cbc93883503332dd8",
     "README.md": "44784c1587c859b662936f189a690e507467af9f",
-    "buildjdk.sh": "631d8c97c9842057bbee451b40d60bb253646cde",
-    "clonejdk.sh": "869f6bfd7bdbb8d97fedc0aa65f56a02c9efb4d3",
+    "buildjdk.sh": "c5d47de590be86d956485ef29a5075bf66e0ed72",
+    "clonejdk.sh": "45929f1ccb0393b83dca79efac8e01942a6dc436",
     "getlibs.sh": "2fe68739ddacf15ca7714bffe7509066f0010ddc",
-    "ci_build_global.sh": "0f7b14cff5f1bfb46a3fe0b8a1920e165442834b",
+    "ci_build_global.sh": "b774e2996584e9c48720744d05849e6cc44e4413",
     "ci_build_arch_aarch64.sh": "9342d4c0f13c448dcbf7acfad15bccaa9bb53098",
-    "extractndk.sh": "785ed3617a73a4353c6d4c44cacdbcc0bc7ce626",
-    "maketoolchain.sh": "d236f9e794803a00c099355506ef8820f5f55c26",
+    "buildlibs.sh": "3b9ee684ce03bfea710940d696795891f1198c05",
+    "maketoolchain.sh": "9008547f4cf572dd7e539192e3fafa29edb1d083",
+    "setdevkitpath.sh": "a43b4448f14e610622cd2635cb95e7f1da924127",
     "tarjdk.sh": "211b2fb218d48a7da2e4d4cae62afaf4cf5bbcd4",
     "removejdkdebuginfo.sh": "0193d35fcd0f694fcf4cce3409d08a63129b72f8",
 }
@@ -31,9 +32,11 @@ def inspect_recipe_text(files: dict[str, str]) -> list[str]:
     clone = files.get("clonejdk.sh", "")
     libs = files.get("getlibs.sh", "")
     global_build = files.get("ci_build_global.sh", "")
+    toolchain = files.get("maketoolchain.sh", "")
     pack = files.get("tarjdk.sh", "")
     workflow = files.get(".github/workflows/build.yml", "")
     readme = files.get("README.md", "")
+    devkit = files.get("setdevkitpath.sh", "")
 
     if "git apply --reject" in build and "|| echo" in build:
         findings.append("BLOCKER: patch application can be partial and failures are tolerated.")
@@ -41,16 +44,16 @@ def inspect_recipe_text(files: dict[str, str]) -> list[str]:
         findings.append("BLOCKER: OpenJDK source is cloned from a moving branch without a SHA.")
     if "wget " in libs and "sha256sum" not in libs and "sha256" not in libs.lower():
         findings.append("HIGH: FreeType/CUPS downloads have no checksum/signature verification.")
-    if "wget " in global_build and "sha256sum" not in global_build and "sha256" not in global_build.lower():
-        findings.append("HIGH: Android NDK download has no checksum/signature verification.")
-    if "unzip" in global_build:
-        findings.append("HIGH: NDK archive is extracted immediately after download.")
+    if "wget " in toolchain and "sha256sum" not in toolchain and "sha256" not in toolchain.lower():
+        findings.append("HIGH: prebuilt GCC toolchain download has no checksum/signature verification.")
+    if "NDK_VERSION=r10e" in devkit and "android-ndk" not in global_build:
+        findings.append("BLOCKER: NDK r10e is selected, but the CI build script has no explicit NDK download/provisioning step.")
     if "git clone --depth 1 -b 'v2.2.0' https://github.com/termux/termux-elf-cleaner" in pack:
         findings.append("HIGH: termux-elf-cleaner is selected by tag, not immutable commit.")
     if "action-tmate" in workflow:
         findings.append("HIGH: upstream CI starts an interactive tmate session on failure.")
     if "NDK r10e" in readme:
-        findings.append("INFO: build depends on historical NDK r10e; reproduce and audit its ABI/API output.")
+        findings.append("INFO: project documentation requires historical NDK r10e and API 21.")
     if not findings:
         findings.append("No known risk pattern detected; manual review is still required.")
     return findings
@@ -81,8 +84,8 @@ def audit_repository(repo: Path) -> tuple[list[str], list[str]]:
             errors.append(f"Blob SHA mismatch for {relative}: expected {expected}, got {actual_blob}")
         files[relative] = data.decode("utf-8", errors="replace")
 
-    report.extend(["", "Static findings (no build scripts executed):", *inspect_recipe_text(files)])
-    report.extend(["", "Conclusion: recipe identity is pinned, but listed build risks remain."])
+    report.extend(["", "Static findings (no upstream build scripts executed):", *inspect_recipe_text(files)])
+    report.extend(["", "Conclusion: source identity is pinned, but listed build risks remain."])
     return errors, report
 
 def main() -> int:
