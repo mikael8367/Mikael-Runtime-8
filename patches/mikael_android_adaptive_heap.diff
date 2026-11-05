@@ -1,7 +1,7 @@
 diff --git a/hotspot/src/share/vm/runtime/arguments.cpp b/hotspot/src/share/vm/runtime/arguments.cpp
 --- a/hotspot/src/share/vm/runtime/arguments.cpp
 +++ b/hotspot/src/share/vm/runtime/arguments.cpp
-@@ -1665,7 +1665,11 @@ void Arguments::set_parallel_gc_flags() {
+@@ -1665,6 +1665,11 @@ void Arguments::set_parallel_gc_flags() {
      }
      if (FLAG_IS_DEFAULT(MaxHeapFreeRatio)) {
 +#ifdef __ANDROID__
