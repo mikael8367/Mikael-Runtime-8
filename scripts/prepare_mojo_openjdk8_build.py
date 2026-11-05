@@ -116,7 +116,7 @@ fi'''
 def smoke_test_script() -> str:
     return '''#!/usr/bin/env bash
 set -euo pipefail
-if [[ -z "$BUILD_IOS" ]]; then BUILD_IOS=0; fi
+if [[ "${BUILD_IOS:-0}" == "1" ]]; then\n  echo "Android toolchain smoke test skipped for iOS build."\n  exit 0\nfi
 if [[ "$BUILD_IOS" == "1" ]]; then
   echo "Android toolchain smoke test skipped for iOS build."
   exit 0
