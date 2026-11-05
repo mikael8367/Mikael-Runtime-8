@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -104,6 +105,26 @@ fi'''
         self.assertIn("if (FLAG_IS_DEFAULT(MaxHeapFreeRatio))", patch_text)
         self.assertNotIn("FLAG_SET_CMDLINE", patch_text)
 
+    def test_adaptive_heap_patch_has_valid_unified_diff_hunk_counts(self):
+        patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_adaptive_heap.diff"
+        lines = patch_path.read_text(encoding="utf-8").splitlines()
+        hunk = next(line for line in lines if line.startswith("@@ "))
+        match = re.match(r"@@ -(\\d+)(?:,(\\d+))? \\+(\\d+)(?:,(\\d+))? @@", hunk)
+        self.assertIsNotNone(match)
+        expected_old = int(match.group(2) or "1")
+        expected_new = int(match.group(4) or "1")
+        old_count = new_count = 0
+        for line in lines[lines.index(hunk) + 1:]:
+            if line.startswith(" "):
+                old_count += 1
+                new_count += 1
+            elif line.startswith("-"):
+                old_count += 1
+            elif line.startswith("+"):
+                new_count += 1
+        self.assertEqual(old_count, expected_old)
+        self.assertEqual(new_count, expected_new)
+
     def test_patch_block_fails_closed(self):
         block = strict_patch_block()
         self.assertIn("git apply --check", block)
@@ -115,7 +136,7 @@ fi'''
         self.assertIn("mikael_android_parallel_gc.diff", block)
         self.assertIn("46f5cec59df926f869de7847246ea841e8865c47", block)
         self.assertIn("mikael_android_adaptive_heap.diff", block)
-        self.assertIn("9abd008332a0e4451f486b12e3872bac42e50e26", block)
+        self.assertIn("a1ef6110308229e06588763db33f17a701c91c35", block)
 
 if __name__ == "__main__":
     unittest.main()
