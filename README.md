@@ -1,48 +1,53 @@
 # Mikael Runtime 8
 
-Projeto experimental de uma distribuição Java 8 para Android ARM64, com foco em Minecraft Java 1.12.2 Forge e integração planejada com FCL e um aplicativo próprio.
+Projeto experimental de uma distribuição Java 8 para Android ARM64, com foco em Minecraft Java 1.12.2 Forge e integração planejada com FCL e CS Launcher Plus.
 
 ## Estado atual
 
-O projeto já possui documentação técnica, um perfil experimental para Minecraft 1.12.2, um validador Python, testes de regressão e GitHub Actions. **Ainda não possui JVM compilada, JRE instalável ou runtime pronta para selecionar no FCL.**
+**Ainda não existe JVM compilada, JRE instalável ou runtime pronta para selecionar no launcher.** O projeto possui perfil experimental, validadores, testes, auditorias de fonte/patches e kits de diagnóstico. Esses componentes não substituem uma JVM.
 
 ## O que já existe
 
-- config/minecraft-1.12.2.json: perfil experimental Java 8 / AArch64.
-- scripts/validate_profile.py: valida versão, arquitetura, heap e argumentos JVM.
-- tests/test_profile.py: testes de regressão do validador.
-- .github/workflows/validate.yml: validação automática do projeto.
-- config/compatibility-minecraft-1.12.2.json: contrato verificável de compatibilidade para Forge, OptiFine, mods e modpacks.
-- scripts/validate_compatibility.py e tests/test_compatibility.py: validador e testes para esse contrato.
-- docs/MOD_COMPATIBILITY.md: requisitos do classpath, JNI, LWJGL, OptiFine e testes por etapas.
-- docs/: arquitetura, seleção da base, formato do perfil, testes, roadmap e compatibilidade com CS Launcher Plus.
-- scripts/package_cslauncher_runtime.py: valida e empacota uma JRE Java 8 ARM64 no formato MultiRT do CS Launcher Plus.
-- tests/device-smoke/: teste Java 8 para verificar uma runtime no próprio Android.
-- .github/workflows/build-test-kit.yml: compila e publica um kit de diagnóstico para baixar pelo celular.\n- .github/workflows/openjdk8-arm64-preflight.yml: valida a fonte OpenJDK 8u e a aplicação ordenada dos patches Android ARM64 antes da compilação.\n- docs/OPENJDK8_ARM64_BUILD.md: critérios e bloqueios da etapa de build da JVM ARM64.
+- Perfil experimental Java 8 / AArch64 para Minecraft 1.12.2.
+- Validadores de perfil e contrato de compatibilidade.
+- Testes automatizados de regressão e empacotamento.
+- Pré-verificação dos patches Android sobre OpenJDK 8u.
+- Auditoria da receita histórica Pojav e auditoria da receita atual MojoLauncher.
+- Validador/empacotador MultiRT para CS Launcher Plus.
+- Kit de diagnóstico Java 8 para testar uma runtime que já exista.
 
-## Validar
+## Base de compilação investigada
 
-Em um ambiente com Python 3.12 ou compatível:
+Foi localizado o fork ativo [MojoLauncher/android-openjdk-build-multiarch](https://github.com/MojoLauncher/android-openjdk-build-multiarch), com workflow de build para AArch64 e publicação de JRE 8 de referência. A receita ainda tem riscos que precisam ser corrigidos antes de executá-la neste projeto. Consulte [docs/MOJO_OPENJDK8_RECIPE_REVIEW.md](docs/MOJO_OPENJDK8_RECIPE_REVIEW.md).
 
-    python scripts/validate_profile.py
-    python -m unittest discover -s tests -v
+## Validar pelo celular
 
-O GitHub Actions executa essas verificações em alterações na branch main.
+- [Actions do projeto](https://github.com/mikael8367/Mikael-Runtime-8/actions)
+- Workflow **Audit maintained OpenJDK 8 ARM64 recipe**: confere a identidade da receita e gera relatório de riscos; não compila JVM.
+- Workflow **OpenJDK 8 ARM64 source preflight**: verifica a fonte OpenJDK e aplicação sequencial dos patches; não compila JVM.
+- Workflow **Build Android Runtime Test Kit**: gera apenas o JAR de diagnóstico; não contém JVM.
 
-## Objetivos técnicos
+## Critérios para chamar de runtime válida
 
-- Java 8 para Android arm64-v8a.
-- Compatibilidade progressiva com Minecraft 1.12.2 e Forge.
-- Integração com FCL e, posteriormente, aplicativo próprio.
+1. Compilar HotSpot Server AArch64 e bibliotecas Java para Android/Bionic.
+2. Fixar fonte, toolchain e dependências com hashes verificados.
+3. Aplicar todos os patches sem rejeições ou aplicação parcial.
+4. Validar ELF64/AArch64, ABI, símbolos e dependências dinâmicas.
+5. Empacotar JRE no formato aceito pelo launcher, com manifesto e SHA-256.
+6. Executar `java -version`, JNI, threads, GC e smoke tests no Android real.
+7. Testar FCL/CS Launcher Plus e Minecraft 1.12.2 com Forge, OptiFine e modpack.
+
+A compatibilidade com mods e OptiFine só será declarada depois desses testes. A JVM não substitui LWJGL, GL4ES, assets, classpath ou o loader do launcher.
+
+## Objetivos
+
+- Android `arm64-v8a` / AArch64.
+- Java 8 para Minecraft 1.12.2.
+- Compatibilidade progressiva com Forge, OptiFine, mods e modpacks.
+- Integração com FCL e CS Launcher Plus.
 - Prioridade em estabilidade; otimizações de FPS somente após benchmark reproduzível.
 
-## Limitações importantes
-
-O kit de diagnóstico também não é uma JVM: ele serve para testar uma runtime Java 8 que já esteja instalada. A Mikael Runtime 8 ainda não possui binário próprio para selecionar no launcher. O perfil e o contrato de compatibilidade não são uma JVM. O projeto define Forge 14.23.5.2864 e OptiFine HD U G5 como alvos de teste, mas ainda não executou esses componentes com uma runtime própria. A VM, JNI, classpath, bibliotecas LWJGL e renderização precisam ser validados em Android real. A fonte OpenJDK 8u e os patches Android agora têm uma pré-verificação automatizada com revisões fixas; isso ainda não é uma JVM compilada. Consulte docs/OPENJDK8_ARM64_BUILD.md.
-
-Para testar uma runtime existente no celular, siga [tests/device-smoke/ANDROID_TEST_GUIDE.md](tests/device-smoke/ANDROID_TEST_GUIDE.md) e baixe o artefato do workflow **Build Android Runtime Test Kit** em Actions.
-
-Consulte [docs/ROADMAP.md](docs/ROADMAP.md), [docs/BUILD_STATUS.md](docs/BUILD_STATUS.md), [docs/OPENJDK8_SOURCE_AUDIT.md](docs/OPENJDK8_SOURCE_AUDIT.md) e [docs/OPENJDK8_ANDROID_PATCH_REVIEW.md](docs/OPENJDK8_ANDROID_PATCH_REVIEW.md), [docs/OPENJDK8_PATCH_FINDINGS.md](docs/OPENJDK8_PATCH_FINDINGS.md) e [docs/OPENJDK8_PATCH_INVENTORY.md](docs/OPENJDK8_PATCH_INVENTORY.md) e [docs/OPENJDK8_TEST_MATRIX.md](docs/OPENJDK8_TEST_MATRIX.md), [docs/MOD_COMPATIBILITY.md](docs/MOD_COMPATIBILITY.md) e [config/compatibility-minecraft-1.12.2.json](config/compatibility-minecraft-1.12.2.json) para auditorias, compatibilidade e estado das etapas.
+Nenhum APK será gerado sem pedido explícito.
 
 ## Licenças
 

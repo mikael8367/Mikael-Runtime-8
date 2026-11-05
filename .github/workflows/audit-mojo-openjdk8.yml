@@ -1,0 +1,55 @@
+name: Audit maintained OpenJDK 8 ARM64 recipe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/audit-mojo-openjdk8.yml"
+      - "scripts/audit_mojo_openjdk8_recipe.py"
+      - "tests/test_mojo_openjdk8_recipe_audit.py"
+      - "docs/MOJO_OPENJDK8_RECIPE_REVIEW.md"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Mikael Runtime 8
+        uses: actions/checkout@v4
+
+      - name: Install Git and Python
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends git python3
+
+      - name: Fetch exact maintained MojoLauncher recipe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init mojo-recipe
+          git -C mojo-recipe remote add origin https://github.com/MojoLauncher/android-openjdk-build-multiarch.git
+          git -C mojo-recipe fetch --depth 1 origin c213846ff125eccf43e6be4adf827e42c579c4ab
+          git -C mojo-recipe checkout --detach FETCH_HEAD
+          test "$(git -C mojo-recipe rev-parse HEAD)" = "c213846ff125eccf43e6be4adf827e42c579c4ab"
+
+      - name: Run audit regression tests
+        run: python3 -m unittest tests.test_mojo_openjdk8_recipe_audit -v
+
+      - name: Audit pinned upstream scripts without executing them
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_mojo_openjdk8_recipe.py --repo mojo-recipe --output mojo-openjdk8-audit.txt
+          cat mojo-openjdk8-audit.txt
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MikaelRuntime8-Mojo-OpenJDK8-Audit
+          path: mojo-openjdk8-audit.txt
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,36 +1,34 @@
 # Seleção da base Java 8 para Android
 
-## Candidato investigado
+## Candidato prioritário atual
 
-Foi inspecionado o repositório público [PojavLauncherTeam/android-openjdk-build-multiarch](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch), branch `buildjre8`.
+Foi localizado o fork ativo [MojoLauncher/android-openjdk-build-multiarch](https://github.com/MojoLauncher/android-openjdk-build-multiarch), atualizado em 2026-10-22. A revisão desta data usa o commit imutável observado:
 
-O README descreve uma compilação OpenJDK 8 para Android ARM64/AArch64, mas também:
-- O repositório foi arquivado em 19 de maio de 2025.
-- O procedimento documentado exige Android NDK r10e.
-- O próprio README alerta que versões de NDK diferentes causam erros de compilação.
-- A receita é antiga e precisa ser reproduzida antes de ser considerada utilizável.
+`c213846ff125eccf43e6be4adf827e42c579c4ab`
+
+O fork mantém workflow para compilar OpenJDK 8 para AArch64 e publicar um JRE de referência usado pelo ecossistema Pojav/Mojo. Isso é uma rota concreta para reproduzir a compilação, mas não prova por si só que o pacote seja compatível com CS Launcher Plus ou com o aparelho do usuário.
+
+## Riscos ainda presentes
+
+A receita atual ainda:
+- tolera falhas na aplicação de patches com `git apply --reject` e `|| echo`;
+- clona OpenJDK sem fixar commit;
+- baixa FreeType/CUPS e NDK sem checksum verificado;
+- extrai o NDK imediatamente após download;
+- baixa `termux-elf-cleaner` por tag, não commit;
+- inicia tmate em falha do workflow;
+- depende de NDK r10e/API 21, uma toolchain histórica.
+
+A auditoria automatizada está em [MOJO_OPENJDK8_RECIPE_REVIEW.md](MOJO_OPENJDK8_RECIPE_REVIEW.md). A auditoria não executa os scripts upstream.
+
+## Candidato histórico
+
+O repositório original [PojavLauncherTeam/android-openjdk-build-multiarch](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch) está arquivado. Seu commit e seus patches continuam documentados em [OPENJDK8_ARM64_BUILD.md](OPENJDK8_ARM64_BUILD.md), mas o fork Mojo é a referência mais atual para reproduzir o build.
+
+## ABI e integração
+
+O alvo é Android `arm64-v8a` (AArch64). Binários Linux AArch64 genéricos não são automaticamente compatíveis com Android/Bionic. Além da JVM, o launcher continua responsável por JNI do ambiente, LWJGL, GL4ES, assets, classpath e loader de mods.
 
 ## Decisão
 
-**Não copiar nem adotar esse projeto como base de produção ainda.** Ele comprova que existiu uma rota de compilação OpenJDK 8 para Android ARM64, mas seu estado arquivado e a dependência de uma toolchain antiga tornam arriscado tratá-lo como solução pronta.
-
-O projeto Mikael Runtime 8 deve primeiro reproduzir a compilação em ambiente isolado e documentar:
-1. Commit exato da fonte OpenJDK usada.
-2. Licenças e avisos de cada componente.
-3. Ferramentas e versões necessárias.
-4. Se o binário gerado realmente executa no Android 12 ARM64.
-5. Se JNI e bibliotecas nativas necessárias ao Minecraft funcionam.
-6. Se a solução pode ser mantida sem depender de ferramentas obsoletas ou inseguras.
-
-## ABI
-
-O alvo do projeto é Android `arm64-v8a` (AArch64). A documentação do Android NDK identifica `arm64-v8a` como ABI de 64 bits para processadores AArch64. Isso não significa que qualquer binário Linux AArch64 seja compatível com Android: sistema operacional, ABI, bibliotecas e nível de API também precisam corresponder.
-
-## Próxima decisão técnica
-
-Antes de implementar patches ou scripts de compilação, comparar:
-- A receita histórica do projeto Pojav.
-- A possibilidade de manter/portar a fonte OpenJDK 8 para uma toolchain Android suportada.
-- A compatibilidade com a interface de runtime esperada pelo FCL.
-
-Nenhuma fonte foi incorporada a este repositório e nenhum binário de terceiros foi copiado.
+Usar a receita Mojo como base de investigação/reprodução, mas não executar o build completo até que os passos inseguros sejam substituídos por etapas fixadas, verificadas e com falha fatal. Nenhum binário de terceiros será rebatizado como Mikael Runtime 8.
