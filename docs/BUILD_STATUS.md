@@ -12,7 +12,11 @@ Referências:
 - https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch
 - https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch/blob/buildjre8/README.md
 
-## Por que não existe um workflow de compilação ainda
+## Pipeline inicial de ARM64
+
+Foi adicionado `.github/workflows/openjdk8-arm64-preflight.yml` para validar, com SHAs fixos, a combinação de OpenJDK 8u e patches Android. Esta etapa é uma pré-verificação de fonte e patches; **não compila JVM/JRE**. Ela impede que falhas de aplicação de patches sejam ignoradas. O plano e os critérios de liberação do build completo estão em [OPENJDK8_ARM64_BUILD.md](OPENJDK8_ARM64_BUILD.md).
+
+## Por que ainda não existe um workflow de compilação completa
 
 Não é seguro criar um workflow que simplesmente baixe e execute scripts de um repositório arquivado sem antes:
 1. Fixar e revisar o commit upstream exato.
