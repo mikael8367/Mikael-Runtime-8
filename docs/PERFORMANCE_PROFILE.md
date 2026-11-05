@@ -49,3 +49,8 @@ Manter o novo padrão somente se o build passar e a comparação no aparelho mos
 ## Limites
 
 Esta alteração afeta a seleção ergonômica do coletor de lixo. Não altera o JIT, o renderer GL4ES, drivers, geração de chunks ou a carga de mods. Não é possível inferir ganho de FPS a partir de uma compilação bem-sucedida.
+
+
+## Ergonomia de memória associada
+
+A branch `memory/android-adaptive-heap`, baseada nesta, adiciona um limite conservador de 85% para `MaxHeapFreeRatio` no Parallel GC Android, somente quando o usuário não definiu esse valor. O objetivo é permitir encolhimento após picos de alocação. O trade-off e os testes estão em [MEMORY_PROFILE.md](MEMORY_PROFILE.md); não assumir ganho sem benchmark.
