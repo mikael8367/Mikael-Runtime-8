@@ -23,6 +23,10 @@ Não é seguro criar um workflow que simplesmente baixe e execute scripts de um 
 
 O build pode ser longo e depender de toolchain antiga. Um workflow que falha ou produz artefato incompatível não representa progresso útil.
 
+## Auditoria de código-fonte
+
+A revisão estática inicial está registrada em [OPENJDK8_SOURCE_AUDIT.md](OPENJDK8_SOURCE_AUDIT.md). Foram identificados riscos de fonte não fixada, falhas de patch ignoradas, downloads sem hash, sessão tmate no CI e toolchain histórica. O pipeline upstream não deve ser executado diretamente antes de mitigar esses pontos.
+
 ## Próxima entrega técnica
 
 A próxima etapa é uma auditoria de proveniência do código OpenJDK e dos scripts upstream, seguida de um teste de compilação controlado. Só depois disso deve ser criado um workflow de build e publicação de artefatos. Nenhum APK será gerado sem pedido explícito.
