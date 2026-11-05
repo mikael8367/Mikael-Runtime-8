@@ -3,7 +3,7 @@ name: Build Mikael Runtime 8 ARM64
 on:
   workflow_dispatch:
   push:
-    branches: [main, "perf/**"]
+    branches: [main, "perf/**", "memory/**"]
     paths:
       - ".github/workflows/build-mikael-runtime8-arm64.yml"
       - "scripts/prepare_mojo_openjdk8_build.py"
