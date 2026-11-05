@@ -48,10 +48,10 @@ A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, dri
 
 1. Confirmar a correção JNA no próximo log do launcher.
 2. Validar os perfis Parallel GC e memória adaptativa com build ARM64 e benchmark no aparelho.
-2. Testar Forge 14.23.5.2864.
-3. Medir FPS, memória e pausas de GC em mundo já gerado e durante exploração.
-4. Fazer sessão prolongada sem crash.
-5. Auditar receitas EMC/fluidos do modpack separadamente.
+3. Testar Forge 14.23.5.2864.
+4. Medir FPS, memória e pausas de GC em mundo já gerado e durante exploração.
+5. Fazer sessão prolongada sem crash.
+6. Auditar receitas EMC/fluidos do modpack separadamente.
 
 Nenhum APK será gerado sem pedido explícito.
 
