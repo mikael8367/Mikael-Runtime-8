@@ -106,7 +106,7 @@ public final class RuntimeSmokeTest {
                 }
             }
         });
-        check("File I/O and UTF-8", new CheckedTest() throws Exception {
+        check("File I/O and UTF-8", new CheckedTest() {
             public void run() throws Exception {
                 File file = File.createTempFile("mikael-runtime-", ".txt");
                 try {
@@ -121,7 +121,7 @@ public final class RuntimeSmokeTest {
                 }
             }
         });
-        check("ZIP/JAR read and write", new CheckedTest() throws Exception {
+        check("ZIP/JAR read and write", new CheckedTest() {
             public void run() throws Exception {
                 File file = File.createTempFile("mikael-runtime-", ".jar");
                 try {
