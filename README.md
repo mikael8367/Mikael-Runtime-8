@@ -23,7 +23,7 @@ Este repositório está na fase de estruturação. Ainda não contém uma JVM co
 
 ## Planejamento
 
-Consulte `docs/ROADMAP.md`, `docs/ARCHITECTURE.md` e `docs/TESTING.md`.
+Consulte `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/BASE_SELECTION.md` e `docs/TESTING.md`.
 
 ## Licenças
 
