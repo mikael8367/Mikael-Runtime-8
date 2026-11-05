@@ -94,7 +94,7 @@ class CsLauncherPackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
             self.make_fake_jre(root)
-            with self.assertRaisesRegex(ValueError, r"\\.tar\\.xz"):
+            with self.assertRaisesRegex(ValueError, r"\.tar\.xz"):
                 package_jre(root, Path(tmp) / "runtime.zip")
 
     def test_archive_is_xz_compressed_tar_with_flat_jre_root(self):
