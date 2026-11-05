@@ -9,6 +9,7 @@ on:
       - "scripts/prepare_mojo_openjdk8_build.py"
       - "scripts/package_cslauncher_runtime.py"
       - "tests/test_prepare_mojo_openjdk8_build.py"
+      - "tests/test_cslauncher_package.py"
 
 permissions:
   contents: read
