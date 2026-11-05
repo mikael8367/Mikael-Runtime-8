@@ -1,59 +1,55 @@
 # Mikael Runtime 8
 
-Projeto experimental de uma distribuição Java 8 para Android ARM64, com foco em Minecraft Java 1.12.2 Forge e integração planejada com FCL e CS Launcher Plus.
+Distribuição experimental Java 8 para Android ARM64/AArch64, direcionada ao Minecraft Java 1.12.2, com foco em estabilidade e integração com CS Launcher Plus/FCL.
 
 ## Estado atual
 
-**A primeira pipeline de compilação própria foi adicionada, mas ainda não existe binário JVM/JRE confirmado.** O resultado só será considerado runtime quando o GitHub Actions compilar, validar e empacotar a JRE e ela ainda passar por testes no Android real.
+**A JRE foi compilada, empacotada e executada no Android 12 ARM64.** O primeiro teste real iniciou Minecraft 1.12.2 com Forge 14.23.5.2860, OptiFine HD U G5, LWJGL 2.9.4/GL4ES 1.1.5 e os mods ProjectE, Simple Storage Network e ProjectE Storage Bridge. O mundo singleplayer abriu e foi salvo no encerramento.
 
-## O que já existe
+Isso comprova o teste funcional inicial, não compatibilidade universal, estabilidade prolongada ou ganho de FPS. O teste ainda não confirma Forge 14.23.5.2864.
 
-- Perfil experimental Java 8 / AArch64 para Minecraft 1.12.2.
-- Validadores de perfil e contrato de compatibilidade.
-- Testes automatizados de regressão e empacotamento.
-- Pré-verificação dos patches Android sobre OpenJDK 8u.
-- Auditoria da receita histórica Pojav e auditoria da receita atual MojoLauncher.
-- Preparador de receita de build com commits e hashes fixados.
-- Pipeline de compilação HotSpot Server ARM64 no GitHub Actions.
-- Validador/empacotador MultiRT para CS Launcher Plus.
-- Kit de diagnóstico Java 8 para teste no aparelho.
+## O que existe
 
-## Pipeline de compilação
+- OpenJDK 8 HotSpot Server compilado para Android ARM64.
+- Pipeline reprodutível com fontes, patches e dependências fixados.
+- Validação ELF64/AArch64 e empacotamento MultiRT `.tar.xz` para CS Launcher Plus.
+- Manifesto e SHA-256 do artefato.
+- Testes automatizados para preparação e empacotamento.
+- Relatório do primeiro teste no aparelho: [Diagnóstico Android 2026-11-05](docs/ANDROID_TEST_LOG_2026-11-05.md).
 
-O workflow [Build Mikael Runtime 8 ARM64](.github/workflows/build-mikael-runtime8-arm64.yml) prepara a receita MojoLauncher de forma controlada, fixa OpenJDK 8u e dependências, verifica o NDK r10e, aplica patches de forma estrita, compila HotSpot Server AArch64 e valida o pacote no formato MultiRT.
+## Build e artefato
 
-A pipeline ainda precisa executar com sucesso. Consulte [docs/ARM64_REAL_BUILD.md](docs/ARM64_REAL_BUILD.md) para os pinos e critérios. A auditoria da receita está em [docs/MOJO_OPENJDK8_RECIPE_REVIEW.md](docs/MOJO_OPENJDK8_RECIPE_REVIEW.md).
+Workflow: [Build Mikael Runtime 8 ARM64](.github/workflows/build-mikael-runtime8-arm64.yml).
 
-## Validar pelo celular
+O artefato `Mikael-Runtime-8-Android-ARM64` contém a runtime `.tar.xz`, checksum e relatórios de build. Consulte a execução do workflow e baixe o artefato correspondente à compilação validada.
 
-- [Actions do projeto](https://github.com/mikael8367/Mikael-Runtime-8/actions)
-- Workflow **Build Mikael Runtime 8 ARM64**: compilação real; o artifact só aparece se todos os passos de build e empacotamento forem aprovados.
-- Workflow **Audit maintained OpenJDK 8 ARM64 recipe**: auditoria estática, não compila JVM.
-- Workflow **OpenJDK 8 ARM64 source preflight**: pré-verificação de fonte e patches, não compila JVM.
-- Workflow **Build Android Runtime Test Kit**: gera apenas o JAR de diagnóstico.
+## Resultado do primeiro teste
 
-## Critérios para chamar de runtime válida
+- JVM Java 8 ARM64: iniciou.
+- Android 12 / CS Launcher Plus: iniciou.
+- Forge 14.23.5.2860: carregou.
+- OptiFine HD U G5: carregou.
+- ProjectE, Simple Storage Network e ProjectE Storage Bridge: carregaram.
+- Mundo singleplayer: abriu, iniciou servidor integrado e salvou.
+- Narrator/JNA: aviso não fatal; a extração nativa ocorreu em armazenamento compartilhado e o Android bloqueou o carregamento pelo linker namespace.
+- Servidor integrado: avisos de atraso de 2,6–3,1 segundos durante o teste curto; causa ainda não isolada.
 
-1. Compilar HotSpot Server AArch64 e bibliotecas Java para Android/Bionic.
-2. Fixar fonte, toolchain e dependências com hashes verificados.
-3. Aplicar todos os patches sem rejeições ou aplicação parcial.
-4. Validar ELF64/AArch64, ABI, símbolos e dependências dinâmicas.
-5. Empacotar JRE no formato aceito pelo launcher, com manifesto e SHA-256.
-6. Executar java -version, JNI, threads, GC e smoke tests no Android real.
-7. Testar FCL/CS Launcher Plus e Minecraft 1.12.2 com Forge, OptiFine e modpack.
+Os detalhes e o plano de validação estão em [docs/ANDROID_TEST_LOG_2026-11-05.md](docs/ANDROID_TEST_LOG_2026-11-05.md).
 
-A compatibilidade com mods e OptiFine só será declarada depois desses testes. A JVM não substitui LWJGL, GL4ES, assets, classpath ou o loader do launcher.
+## Limites técnicos
 
-## Objetivos
+A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, driver gráfico, mods ou configurações de receitas. Avisos do OpenGL/GL4ES e do ProjectE precisam ser corrigidos na camada correspondente. Não serão adicionadas flags experimentais de GC ou de heap sem medições reproduzíveis.
 
-- Android arm64-v8a / AArch64.
-- Java 8 para Minecraft 1.12.2.
-- Compatibilidade progressiva com Forge, OptiFine, mods e modpacks.
-- Integração com FCL e CS Launcher Plus.
-- Prioridade em estabilidade; otimizações de FPS somente após benchmark reproduzível.
+## Próximas validações
+
+1. Configurar JNA para extrair bibliotecas nativas em diretório privado do app e confirmar novo log.
+2. Testar Forge 14.23.5.2864.
+3. Medir FPS, memória e pausas de GC em mundo já gerado e durante exploração.
+4. Fazer sessão prolongada sem crash.
+5. Auditar receitas EMC/fluidos do modpack separadamente.
 
 Nenhum APK será gerado sem pedido explícito.
 
 ## Licenças
 
-O código original deste repositório usa a licença indicada em LICENSE. OpenJDK e dependências mantêm suas próprias licenças e avisos; a licença MIT deste repositório não altera essas obrigações.
+O código original deste repositório usa a licença indicada em LICENSE. OpenJDK e dependências mantêm suas próprias licenças e avisos.
