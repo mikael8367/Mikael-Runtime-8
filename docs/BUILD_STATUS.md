@@ -30,17 +30,17 @@ O `latest.log` enviado confirma:
 
 Relatório completo: [ANDROID_TEST_LOG_2026-11-05.md](ANDROID_TEST_LOG_2026-11-05.md).
 
-## Perfil de desempenho — branch em validação
+## Perfil base GC + memória — build ARM64 concluído
 
-A branch `perf/android-parallel-gc` adiciona um patch Android-only no HotSpot 8 para selecionar `UseParallelGC` como padrão ergonômico quando nenhum coletor foi explicitamente escolhido. A seleção explícita pelo usuário permanece respeitada. A alteração não fixa o número de threads.
+A branch `memory/android-adaptive-heap` contém os patches Android-only para selecionar Parallel GC por ergonomia e usar `MaxHeapFreeRatio=85` apenas quando o valor ainda é padrão. Opções explícitas permanecem respeitadas.
 
-- Patch: `patches/mikael_android_parallel_gc.diff`.
-- Hash Git blob: `46f5cec59df926f869de7847246ea841e8865c47`.
-- Teste de regressão: valida hash, guarda Android, opção Parallel GC e inclusão no bloco de aplicação estrita.
-- Teste local de patch: `git apply --check` passou contra o trecho-fonte fixado do OpenJDK.
-- CI run: [Build #36](https://github.com/mikael8367/Mikael-Runtime-8/actions/runs/42127456896), atualmente em compilação no momento desta atualização.
+- CI run [42128441200](https://github.com/mikael8367/Mikael-Runtime-8/actions/runs/42128441200): sucesso em compilação, validação/empacotamento e upload.
+- Artefato `Mikael-Runtime-8-Android-ARM64`, ID `13463891035`, com SHA-256 `a02fe616eeb7af27409c06dd0106ffc092c07d0cbd4334857b72cb5882d2ffbf`.
+- A aprovação do build comprova compilação e integridade estrutural; não comprova ganho de FPS nem estabilidade prolongada no aparelho.
 
-**Ainda não aprovado para uso diário:** falta concluir a compilação/empacotamento e comparar no aparelho o FPS, pausas de GC, memória e estabilidade com o mesmo mundo/modpack. O Parallel GC é uma hipótese de throughput, não um ganho de FPS comprovado. Detalhes: [PERFORMANCE_PROFILE.md](PERFORMANCE_PROFILE.md).
+## Perfil SIMD — nova validação pendente
+
+A branch `perf/android-asimd-memory` adiciona `patches/mikael_android_simd_memory.diff`: em Android AArch64, ativa `UseSIMDForMemoryOps` somente se `HWCAP_ASIMD` estiver disponível e o usuário não tiver definido a flag explicitamente. O patch será submetido a teste de hash, contagem dos hunks, aplicação estrita ao OpenJDK fixado, build ARM64, inspeção ELF e empacotamento. Depois, precisa de comparação real de FPS e stutter no aparelho. Detalhes: [ANDROID_SIMD_PROFILE.md](ANDROID_SIMD_PROFILE.md).
 
 ## Pipeline ARM64
 

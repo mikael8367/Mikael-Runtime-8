@@ -14,7 +14,7 @@ class PrepareMojoBuildTests(unittest.TestCase):
 
     def test_all_source_and_patch_pins_are_immutable(self):
         self.assertEqual(len(OPENJDK_COMMIT), 40)
-        self.assertEqual(len(PATCH_BLOBS), 5)
+        self.assertEqual(len(PATCH_BLOBS), 6)
         self.assertTrue(all(len(value) == 40 for value in PATCH_BLOBS.values()))
         self.assertEqual(len(GCC_SHA256), 64)
 
@@ -105,6 +105,41 @@ fi'''
         self.assertIn("if (FLAG_IS_DEFAULT(MaxHeapFreeRatio))", patch_text)
         self.assertNotIn("FLAG_SET_CMDLINE", patch_text)
 
+    def test_android_asimd_memory_patch_is_pinned_and_preserves_user_override(self):
+        patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_simd_memory.diff"
+        patch = patch_path.read_bytes()
+        self.assertEqual(git_blob_sha(patch), PATCH_BLOBS["mikael_android_simd_memory.diff"])
+        patch_text = patch.decode("utf-8")
+        self.assertIn("#ifndef HWCAP_ASIMD", patch_text)
+        self.assertIn("#ifdef __ANDROID__", patch_text)
+        self.assertIn("(auxv & HWCAP_ASIMD) != 0", patch_text)
+        self.assertIn("FLAG_IS_DEFAULT(UseSIMDForMemoryOps)", patch_text)
+        self.assertIn("FLAG_SET_DEFAULT(UseSIMDForMemoryOps, true)", patch_text)
+        self.assertNotIn("FLAG_SET_CMDLINE", patch_text)
+
+    def test_android_asimd_patch_has_valid_unified_diff_hunk_counts(self):
+        patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_simd_memory.diff"
+        lines = patch_path.read_text(encoding="utf-8").splitlines()
+        hunks = [i for i, line in enumerate(lines) if line.startswith("@@ ")]
+        self.assertEqual(len(hunks), 2)
+        for position, start in enumerate(hunks):
+            end = hunks[position + 1] if position + 1 < len(hunks) else len(lines)
+            match = re.match(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", lines[start])
+            self.assertIsNotNone(match)
+            expected_old = int(match.group(2) or "1")
+            expected_new = int(match.group(4) or "1")
+            old_count = new_count = 0
+            for line in lines[start + 1:end]:
+                if line.startswith(" "):
+                    old_count += 1
+                    new_count += 1
+                elif line.startswith("-") and not line.startswith("---"):
+                    old_count += 1
+                elif line.startswith("+") and not line.startswith("+++"):
+                    new_count += 1
+            self.assertEqual(old_count, expected_old)
+            self.assertEqual(new_count, expected_new)
+
     def test_adaptive_heap_patch_has_valid_unified_diff_hunk_counts(self):
         patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_adaptive_heap.diff"
         lines = patch_path.read_text(encoding="utf-8").splitlines()
@@ -137,6 +172,8 @@ fi'''
         self.assertIn("46f5cec59df926f869de7847246ea841e8865c47", block)
         self.assertIn("mikael_android_adaptive_heap.diff", block)
         self.assertIn("a1ef6110308229e06588763db33f17a701c91c35", block)
+        self.assertIn("mikael_android_simd_memory.diff", block)
+        self.assertIn("105bc93c836839285e9f63a587339abc6f83ee24", block)
 
 if __name__ == "__main__":
     unittest.main()

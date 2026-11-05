@@ -15,6 +15,7 @@ PATCH_BLOBS = {
     "jdk8u_android_main.diff": "8ba2f3c46963b3d125eb416cfb5185a4f53b69f6",
     "mikael_android_parallel_gc.diff": "46f5cec59df926f869de7847246ea841e8865c47",
     "mikael_android_adaptive_heap.diff": "a1ef6110308229e06588763db33f17a701c91c35",
+    "mikael_android_simd_memory.diff": "105bc93c836839285e9f63a587339abc6f83ee24",
 }
 FREETYPE_COMMIT = "6a2b3e4007e794bfc6c91030d0ed987f925164a8"
 CUPS_COMMIT = "070e33a4c9dfdb21638de0fedb2904391c30d070"
@@ -183,7 +184,7 @@ def inject_toolchain_smoke_test(global_text: str) -> str:
 
 def strict_patch_block() -> str:
     return """# Apply the pinned Android patch set strictly; any mismatch aborts the build.
-for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.diff mikael_android_parallel_gc.diff mikael_android_adaptive_heap.diff; do
+for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.diff mikael_android_parallel_gc.diff mikael_android_adaptive_heap.diff mikael_android_simd_memory.diff; do
   expected=""
   case "$patch" in
     jdk8u_android.diff) expected="35137738d48cee5fbcbd41d335d3414ee4a6f91f" ;;
@@ -191,6 +192,7 @@ for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.d
     jdk8u_android_main.diff) expected="8ba2f3c46963b3d125eb416cfb5185a4f53b69f6" ;;
     mikael_android_parallel_gc.diff) expected="46f5cec59df926f869de7847246ea841e8865c47" ;;
     mikael_android_adaptive_heap.diff) expected="a1ef6110308229e06588763db33f17a701c91c35" ;;
+    mikael_android_simd_memory.diff) expected="105bc93c836839285e9f63a587339abc6f83ee24" ;;
   esac
   actual="$(git hash-object "../patches/$patch")"
   test "$actual" = "$expected"

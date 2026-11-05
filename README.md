@@ -10,7 +10,7 @@ Isso comprova o teste funcional inicial, não compatibilidade universal, estabil
 
 ## Perfil de desempenho em desenvolvimento
 
-A branch `perf/android-parallel-gc` seleciona Parallel GC por ergonomia em Android. A branch `memory/android-adaptive-heap` acrescenta redução adaptativa do heap ocioso após picos, preservando opções explícitas. Ambas aguardam build ARM64 e benchmark no aparelho. Detalhes: [Desempenho](docs/PERFORMANCE_PROFILE.md) e [Memória](docs/MEMORY_PROFILE.md).
+A base `memory/android-adaptive-heap` compilou e foi empacotada para ARM64. A branch `perf/android-asimd-memory` acrescenta uma otimização experimental de cópia de memória SIMD/NEON, ativada apenas quando o kernel anuncia ASIMD e sem substituir uma opção explícita. O novo perfil ainda precisa compilar e ser medido no aparelho; não há ganho de FPS comprovado. Detalhes: [Desempenho](docs/PERFORMANCE_PROFILE.md), [Memória](docs/MEMORY_PROFILE.md) e [SIMD ARM64](docs/ANDROID_SIMD_PROFILE.md).
 
 ## O que existe
 

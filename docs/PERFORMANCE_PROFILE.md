@@ -54,3 +54,18 @@ Esta alteração afeta a seleção ergonômica do coletor de lixo. Não altera o
 ## Ergonomia de memória associada
 
 A branch `memory/android-adaptive-heap`, baseada nesta, adiciona um limite conservador de 85% para `MaxHeapFreeRatio` no Parallel GC Android, somente quando o usuário não definiu esse valor. O objetivo é permitir encolhimento após picos de alocação. O trade-off e os testes estão em [MEMORY_PROFILE.md](MEMORY_PROFILE.md); não assumir ganho sem benchmark.
+
+## SIMD de cópia de memória — candidato Android ARM64
+
+A branch `perf/android-asimd-memory` acrescenta `patches/mikael_android_simd_memory.diff` em `VM_Version::get_processor_features()`:
+
+- Em Android AArch64, consulta o bit `HWCAP_ASIMD` divulgado pelo kernel.
+- Só quando ASIMD está presente e `UseSIMDForMemoryOps` ainda é padrão, ativa os stubs SIMD de movimentação de memória do HotSpot.
+- Um `-XX:-UseSIMDForMemoryOps` ou `-XX:+UseSIMDForMemoryOps` explícito é preservado.
+- Fora do Android, a seleção original do OpenJDK permanece.
+
+Os stubs AArch64 já têm caminhos SIMD e não SIMD. O objetivo é testar cópias grandes e movimentação de arrays em Java, trabalho que pode aparecer durante carregamento de chunks, serialização e execução de mods. A hipótese é reduzir instruções e melhorar throughput de cópia; o efeito em FPS depende do gargalo real e pode ser neutro ou regressivo em alguns SoCs.
+
+**Não é um ajuste de renderização:** não modifica PowerVR, OpenGL ES, GL4ES, LWJGL, shaders, OptiFine ou a GPU. Não declarar aumento de FPS antes do benchmark no mesmo mundo, resolução, render distance, heap e conjunto de mods.
+
+Plano, requisitos de CPU e teste: [ANDROID_SIMD_PROFILE.md](ANDROID_SIMD_PROFILE.md).

@@ -9,6 +9,7 @@ on:
       - "scripts/prepare_mojo_openjdk8_build.py"
       - "patches/mikael_android_parallel_gc.diff"
       - "patches/mikael_android_adaptive_heap.diff"
+      - "patches/mikael_android_simd_memory.diff"
       - "scripts/package_cslauncher_runtime.py"
       - "tests/test_prepare_mojo_openjdk8_build.py"
       - "tests/test_cslauncher_package.py"
@@ -132,6 +133,7 @@ jobs:
             echo "VM: HotSpot Server"
             echo "Android default GC: Parallel GC (unless explicitly overridden)"
             echo "Android Parallel GC MaxHeapFreeRatio: 85 (only if not explicitly set)"
+            echo "Android AArch64 SIMD memory stubs: enabled when HWCAP_ASIMD is present, unless explicitly overridden"
             echo "Device execution: NOT YET VERIFIED"
             echo "Minecraft/Forge/OptiFine: NOT YET VERIFIED"
             cat build-output/SHA256SUMS
