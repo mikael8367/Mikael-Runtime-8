@@ -20,6 +20,8 @@ class PrepareMojoBuildTests(unittest.TestCase):
         self.assertIn(OPENJDK_COMMIT, scripts["clonejdk.sh"])
         self.assertIn("6a2b3e4007e794bfc6c91030d0ed987f925164a8", scripts["getlibs.sh"])
         self.assertIn("070e33a4c9dfdb21638de0fedb2904391c30d070", scripts["getlibs.sh"])
+        self.assertIn("./autogen.sh", scripts["getlibs.sh"])
+        self.assertIn("test -x ./configure", scripts["getlibs.sh"])
         self.assertIn(GCC_SHA256, scripts["maketoolchain.sh"])
         self.assertIn(': "${BUILD_IOS:=0}"', scripts["maketoolchain.sh"])
         self.assertIn(': "${BUILD_IOS:=0}"', scripts["tarjdk.sh"])
