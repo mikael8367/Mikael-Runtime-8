@@ -41,6 +41,7 @@ def hardened_scripts(openjdk_commit: str = OPENJDK_COMMIT) -> dict[str, str]:
     )
     toolchain = f"""#!/usr/bin/env bash
 set -euo pipefail
+: "${{BUILD_IOS:=0}}"
 . setdevkitpath.sh
 mkdir -p "$NDK/generated-toolchains/android-$TARGET_SHORT-toolchain"
 pushd "$NDK/generated-toolchains/android-$TARGET_SHORT-toolchain"
@@ -56,6 +57,7 @@ cp "devkit.info.$TARGET_SHORT" "$NDK/generated-toolchains/android-$TARGET_SHORT-
 """
     elf_cleaner = f"""#!/usr/bin/env bash
 set -euo pipefail
+: "${{BUILD_IOS:=0}}"
 if [[ "$BUILD_IOS" != "1" ]]; then
   git init termux-elf-cleaner
   git -C termux-elf-cleaner remote add origin https://github.com/termux/termux-elf-cleaner.git
