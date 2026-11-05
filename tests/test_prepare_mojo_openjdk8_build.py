@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from scripts.prepare_mojo_openjdk8_build import (
     GCC_SHA256, OPENJDK_COMMIT, PATCH_BLOBS, git_blob_sha,
@@ -12,7 +13,7 @@ class PrepareMojoBuildTests(unittest.TestCase):
 
     def test_all_source_and_patch_pins_are_immutable(self):
         self.assertEqual(len(OPENJDK_COMMIT), 40)
-        self.assertEqual(len(PATCH_BLOBS), 3)
+        self.assertEqual(len(PATCH_BLOBS), 4)
         self.assertTrue(all(len(value) == 40 for value in PATCH_BLOBS.values()))
         self.assertEqual(len(GCC_SHA256), 64)
 
@@ -82,6 +83,16 @@ fi'''
         self.assertIn('+PRODUCT_SUFFIX="Runtime Environment (Android)"', patch)
         self.assertNotIn('JDK_UPDATE_VERSION=502', patch)
 
+    def test_android_performance_patch_is_pinned_and_uses_ergonomic_parallel_gc(self):
+        patch_path = Path(__file__).resolve().parents[1] / "patches" / "mikael_android_parallel_gc.diff"
+        patch = patch_path.read_bytes()
+        self.assertEqual(git_blob_sha(patch), PATCH_BLOBS["mikael_android_parallel_gc.diff"])
+        patch_text = patch.decode("utf-8")
+        self.assertIn("#ifdef __ANDROID__", patch_text)
+        self.assertIn("FLAG_SET_ERGO(bool, UseParallelGC, true);", patch_text)
+        self.assertIn("Explicit user-selected collectors are preserved", patch_text)
+        self.assertNotIn("UseG1GC, true", patch_text)
+
     def test_patch_block_fails_closed(self):
         block = strict_patch_block()
         self.assertIn("git apply --check", block)
@@ -90,6 +101,8 @@ fi'''
         self.assertNotIn("|| echo", block)
         self.assertIn("ba84685b24586d4794e7822f2927f62e960f0c4e", block)
         self.assertIn(".mikael-android-branding.compat.diff", block)
+        self.assertIn("mikael_android_parallel_gc.diff", block)
+        self.assertIn("46f5cec59df926f869de7847246ea841e8865c47", block)
 
 if __name__ == "__main__":
     unittest.main()
