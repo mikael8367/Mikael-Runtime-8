@@ -93,6 +93,58 @@ tar cJf "jdk8-$TARGET_SHORT-$(date -u +%Y%m%d)-$JDK_DEBUG_LEVEL.tar.xz" -C jdkou
         "tarjdk.sh": elf_cleaner,
     }
 
+def harden_buildlibs_script(original: str) -> str:
+    old = '''if [[ "$error_code" -ne 0 ]]; then
+  echo "\\n\\nCONFIGURE ERROR $error_code , config.log:"
+  cat config.log
+  exit $error_code
+fi'''
+    new = '''if [[ "${error_code:-0}" -ne 0 ]]; then
+  echo "\\n\\nFREETYPE CONFIGURE ERROR $error_code; expected log: builds/unix/config.log"
+  if [[ -f builds/unix/config.log ]]; then
+    cat builds/unix/config.log
+  else
+    find . -name config.log -type f -print -exec tail -n 200 {} \\;
+  fi
+  exit "$error_code"
+fi'''
+    if old not in original:
+        raise ValueError("Could not locate the pinned FreeType configure error handler.")
+    return original.replace(old, new, 1)
+
+
+def smoke_test_script() -> str:
+    return '''#!/usr/bin/env bash
+set -euo pipefail
+if [[ -z "$BUILD_IOS" ]]; then BUILD_IOS=0; fi
+if [[ "$BUILD_IOS" == "1" ]]; then
+  echo "Android toolchain smoke test skipped for iOS build."
+  exit 0
+fi
+compiler="$TOOLCHAIN/bin/$TARGET-gcc"
+test -x "$compiler"
+echo "=== Cross compiler identity ==="
+"$compiler" --version
+"$compiler" -v
+echo "=== Sysroot and runtime files ==="
+"$compiler" -print-sysroot
+for item in crtbegin_dynamic.o libc.so libgcc.a; do
+  resolved="$("$compiler" -print-file-name="$item")"
+  printf '%s -> %s\\n' "$item" "$resolved"
+  test -f "$resolved"
+done
+cat > .mikael-toolchain-smoke.c <<'EOF'
+int main(void) { return 0; }
+EOF
+echo "=== Compile and link Android ARM64 executable ==="
+"$compiler" --sysroot="$TOOLCHAIN/sysroot" -fPIE -pie .mikael-toolchain-smoke.c -o .mikael-toolchain-smoke
+file .mikael-toolchain-smoke
+readelf -h .mikael-toolchain-smoke
+readelf -h .mikael-toolchain-smoke | grep -q 'AArch64'
+rm -f .mikael-toolchain-smoke .mikael-toolchain-smoke.c
+echo "Android ARM64 toolchain smoke test passed."
+'''
+
 def strict_patch_block() -> str:
     return """# Apply the pinned Android patch set strictly; any mismatch aborts the build.
 for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.diff; do
@@ -133,6 +185,23 @@ def prepare(recipe_dir: Path, openjdk_commit: str = OPENJDK_COMMIT) -> None:
         raise ValueError("Unsafe patch application remains in buildjdk.sh")
     for name, content in hardened_scripts(openjdk_commit).items():
         (recipe_dir / name).write_text(content, encoding="utf-8")
+    buildlibs_file = recipe_dir / "buildlibs.sh"
+    buildlibs_file.write_text(
+        harden_buildlibs_script(buildlibs_file.read_text(encoding="utf-8")),
+        encoding="utf-8",
+    )
+    (recipe_dir / "smoke_test_android_toolchain.sh").write_text(
+        smoke_test_script(), encoding="utf-8"
+    )
+    global_build = recipe_dir / "ci_build_global.sh"
+    global_text = global_build.read_text(encoding="utf-8")
+    needle = "  ./maketoolchain.sh\\n"
+    if needle not in global_text:
+        raise ValueError("Could not locate toolchain build hook in ci_build_global.sh.")
+    global_build.write_text(
+        global_text.replace(needle, needle + "  ./smoke_test_android_toolchain.sh\\n", 1),
+        encoding="utf-8",
+    )
     build_file.write_text(hardened_build, encoding="utf-8")
     workflow = recipe_dir / ".github" / "workflows" / "build.yml"
     workflow_text = workflow.read_text(encoding="utf-8")
