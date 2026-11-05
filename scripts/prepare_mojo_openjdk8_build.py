@@ -14,7 +14,7 @@ PATCH_BLOBS = {
     "jdk8u_android_branding.diff": "ba84685b24586d4794e7822f2927f62e960f0c4e",
     "jdk8u_android_main.diff": "8ba2f3c46963b3d125eb416cfb5185a4f53b69f6",
     "mikael_android_parallel_gc.diff": "46f5cec59df926f869de7847246ea841e8865c47",
-    "mikael_android_adaptive_heap.diff": "9abd008332a0e4451f486b12e3872bac42e50e26",
+    "mikael_android_adaptive_heap.diff": "a1ef6110308229e06588763db33f17a701c91c35",
 }
 FREETYPE_COMMIT = "6a2b3e4007e794bfc6c91030d0ed987f925164a8"
 CUPS_COMMIT = "070e33a4c9dfdb21638de0fedb2904391c30d070"
@@ -190,7 +190,7 @@ for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.d
     jdk8u_android_branding.diff) expected="ba84685b24586d4794e7822f2927f62e960f0c4e" ;;
     jdk8u_android_main.diff) expected="8ba2f3c46963b3d125eb416cfb5185a4f53b69f6" ;;
     mikael_android_parallel_gc.diff) expected="46f5cec59df926f869de7847246ea841e8865c47" ;;
-    mikael_android_adaptive_heap.diff) expected="9abd008332a0e4451f486b12e3872bac42e50e26" ;;
+    mikael_android_adaptive_heap.diff) expected="a1ef6110308229e06588763db33f17a701c91c35" ;;
   esac
   actual="$(git hash-object "../patches/$patch")"
   test "$actual" = "$expected"
