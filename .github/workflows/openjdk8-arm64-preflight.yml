@@ -1,0 +1,80 @@
+name: OpenJDK 8 ARM64 source preflight
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/openjdk8-arm64-preflight.yml"
+      - "docs/BUILD_STATUS.md"
+      - "docs/BASE_SELECTION.md"
+
+permissions:
+  contents: read
+
+jobs:
+  source-preflight:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Mikael Runtime 8
+        uses: actions/checkout@v4
+
+      - name: Install source validation tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends git ca-certificates
+
+      - name: Fetch pinned Android build recipe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch.git upstream-recipe
+          git -C upstream-recipe checkout --detach 04b90441da7e9649cb6508a037423f08d1fc531f
+          test "$(git -C upstream-recipe rev-parse HEAD)" = "04b90441da7e9649cb6508a037423f08d1fc531f"
+
+      - name: Fetch pinned OpenJDK 8u source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/openjdk/jdk8u.git openjdk
+          git -C openjdk checkout --detach 7fdf5cd77f209427758437d7e147ea1c18b4ec35
+          test "$(git -C openjdk rev-parse HEAD)" = "7fdf5cd77f209427758437d7e147ea1c18b4ec35"
+          test -f openjdk/configure
+
+      - name: Check and apply Android AArch64 patches strictly
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd openjdk
+          git status --porcelain
+          git apply --check --whitespace=error-all ../upstream-recipe/patches/jdk8u_android.diff
+          git apply --check --whitespace=error-all ../upstream-recipe/patches/jdk8u_android_main.diff
+          git apply --whitespace=error-all ../upstream-recipe/patches/jdk8u_android.diff
+          git apply --whitespace=error-all ../upstream-recipe/patches/jdk8u_android_main.diff
+          git diff --check
+          test -f hotspot/make/linux/makefiles/arm64.make
+          echo "Pinned OpenJDK source and Android patch set passed the strict apply check."
+
+      - name: Record source provenance
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "Recipe commit: 04b90441da7e9649cb6508a037423f08d1fc531f"
+            echo "OpenJDK commit: 7fdf5cd77f209427758437d7e147ea1c18b4ec35"
+            if test -d openjdk/.git; then
+              echo "OpenJDK HEAD: $(git -C openjdk rev-parse HEAD)"
+              echo "Patch status:"
+              git -C openjdk status --short
+            fi
+          } | tee openjdk-source-preflight.txt
+
+      - name: Upload preflight report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MikaelRuntime8-OpenJDK8-ARM64-Preflight
+          path: openjdk-source-preflight.txt
+          if-no-files-found: warn
+          retention-days: 14
