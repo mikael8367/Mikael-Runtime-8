@@ -38,7 +38,7 @@ def hardened_scripts(openjdk_commit: str = OPENJDK_COMMIT) -> dict[str, str]:
         "https://github.com/freetype/freetype.git", "freetype-2.10.4", FREETYPE_COMMIT
     ) + pinned_clone(
         "https://github.com/apple/cups.git", "cups-2.2.4", CUPS_COMMIT
-    )
+    ) + """\n# FreeType 2.10.4 stores configure.raw in git; generate the configure script.\npushd freetype-2.10.4\n./autogen.sh\ntest -x ./configure\npopd\n"""
     toolchain = f"""#!/usr/bin/env bash
 set -euo pipefail
 : "${{BUILD_IOS:=0}}"
