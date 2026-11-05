@@ -22,6 +22,19 @@ GCC_SHA256 = "ad32f8952dc2bbe5d9e7a6f4a6f0a185a8b1dfbe6f0e7410db5da8ba45f3453f"
 def git_blob_sha(data: bytes) -> str:
     return hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
 
+def compatible_branding_patch() -> str:
+    """Rebuild the branding hunk without stale JDK_UPDATE_VERSION context."""
+    return """diff --git a/common/autoconf/version-numbers b/common/autoconf/version-numbers
+--- a/common/autoconf/version-numbers
++++ b/common/autoconf/version-numbers
+@@ -32,3 +32,3 @@
+ PRODUCT_NAME=OpenJDK
+-PRODUCT_SUFFIX="Runtime Environment"
++PRODUCT_SUFFIX="Runtime Environment (Android)"
+ JDK_RC_PLATFORM_NAME=Platform
+"""
+
+
 def pinned_clone(repo_url: str, directory: str, commit: str) -> str:
     return f"""git init "{directory}"
 git -C "{directory}" remote add origin "{repo_url}"
@@ -175,8 +188,12 @@ for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.d
   esac
   actual="$(git hash-object "../patches/$patch")"
   test "$actual" = "$expected"
-  git apply --check --whitespace=fix "../patches/$patch"
-  git apply --whitespace=fix "../patches/$patch"
+  apply_path="../patches/$patch"
+  if [[ "$patch" == "jdk8u_android_branding.diff" ]]; then
+    apply_path="../patches/.mikael-android-branding.compat.diff"
+  fi
+  git apply --check --whitespace=fix "$apply_path"
+  git apply --whitespace=fix "$apply_path"
   git diff --check
 done
 """
@@ -193,6 +210,9 @@ def prepare(recipe_dir: Path, openjdk_commit: str = OPENJDK_COMMIT) -> None:
         path = recipe_dir / "patches" / filename
         if not path.is_file() or git_blob_sha(path.read_bytes()) != expected:
             raise ValueError(f"Patch missing or changed: {filename}")
+    (recipe_dir / "patches" / ".mikael-android-branding.compat.diff").write_text(
+        compatible_branding_patch(), encoding="utf-8"
+    )
     build_file = recipe_dir / "buildjdk.sh"
     original = build_file.read_text(encoding="utf-8")
     start = original.find("# Apply patches")
