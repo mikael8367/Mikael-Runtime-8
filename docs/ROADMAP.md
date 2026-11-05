@@ -8,7 +8,8 @@
 - [x] Executar validações de perfil automaticamente no GitHub Actions.
 - [x] Documentar o contrato MultiRT do CS Launcher Plus.
 - [x] Criar empacotador e testes do arquivo de runtime compatível com CS Launcher Plus.
-- [ ] Confirmar os testes no GitHub Actions.
+- [x] Confirmar os testes do projeto e do contrato no GitHub Actions.
+- [ ] Confirmar a compilação e publicação do kit de diagnóstico.
 - [ ] Confirmar execução verde do workflow no GitHub.
 
 ## Marco 1 — Escolha e reprodução da base Java 8
@@ -27,7 +28,10 @@
 ## Marco 2 — Protótipo Java 8 ARM64
 - [ ] Compilar uma runtime mínima a partir de fonte validada.
 - [ ] Verificar ABI, dependências nativas e nível mínimo do Android.
-- [ ] Executar java -version e testes básicos de classes, threads e JNI em Android real.
+- [x] Criar kit Java 8 de diagnóstico para executar no Android.
+- [ ] Executar o kit em uma runtime Java 8 ARM64 real e guardar o relatório.
+- [ ] Compilar a Mikael Runtime 8 própria.
+- [ ] Executar java -version e testes básicos de classes, threads e JNI na runtime própria em Android real.
 - [ ] Validar carregamento e permissões de arquivos no Android 12.
 
 ## Marco 3 — Compatibilidade Minecraft
