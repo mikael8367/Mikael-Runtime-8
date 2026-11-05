@@ -85,17 +85,19 @@ Em cada execução, registrar a lista e versão dos mods, classpath efetivo, arg
 
 ## 6. Kit de diagnóstico executável no Android
 
-O projeto fornece um JAR de diagnóstico Java 8 em `tests/device-smoke/`. Ele é compilado pelo workflow `Build Android Runtime Test Kit` e publicado como artefato ZIP do GitHub Actions. No celular, baixe o artefato na aba Actions, extraia e siga `LEIA-ME.md`.
+O projeto fornece um JAR de diagnóstico Java 8 em `tests/device-smoke/`. O workflow `Build Android Runtime Test Kit` compila o JAR e publica o ZIP `MikaelRuntime8-Device-Test-Kit` como artefato temporário do GitHub Actions. No celular, baixe o artefato na aba Actions, extraia e siga `LEIA-ME.md`.
 
-Execute com uma runtime Java 8 ARM64 já instalada:
+Execute usando explicitamente a runtime que deseja diagnosticar:
 
 ```sh
 java -jar MikaelRuntimeSmokeTest.jar
 ```
 
-Guarde toda a saída. O kit verifica versão Java, arquitetura, reflexão, threads, heap/GC, arquivos UTF-8 e ZIP/JAR. As verificações de classes Forge/LaunchWrapper são informativas e dependem do classpath usado.
+O diagnóstico informa `java.home`, versão, VM, arquitetura, classpath, caminho de bibliotecas, processadores e memória. Verifica reflexão, threads, heap/GC, arquivos UTF-8, ZIP/JAR e diretório temporário. Também tenta salvar `MikaelRuntime8-device-report.txt` no diretório de execução e, se falhar, no diretório temporário. A saída informa `REPORT_FILE=` com o caminho.
 
-**Limite:** esse teste preliminar verifica a runtime que foi usada para executar o JAR. Não testa uma Mikael Runtime 8 própria enquanto ela não existir como binário, e não comprova compatibilidade gráfica ou de modpacks.
+As verificações de classes Forge/LaunchWrapper são informativas e dependem do classpath usado.
+
+**Limite:** esse teste verifica somente a runtime que executou o JAR. Não testa uma Mikael Runtime 8 própria enquanto ela não existir como binário, e não comprova compatibilidade gráfica ou de modpacks. O launcher precisa permitir invocar um JAR arbitrário com a runtime selecionada; não presumir que FCL/CS Launcher Plus ofereça essa função.
 
 ## 7. Validação automática do futuro pacote JRE
 
