@@ -54,7 +54,7 @@ fi'''
         source = "#!/bin/bash\n  ./maketoolchain.sh\nelse\n  echo ios\nfi\n"
         result = inject_toolchain_smoke_test(source)
         self.assertIn(
-            "  ./maketoolchain.sh\n  ./smoke_test_android_toolchain.sh\nelse",
+            "  ./maketoolchain.sh\n  bash ./smoke_test_android_toolchain.sh\nelse",
             result,
         )
         with self.assertRaises(ValueError):
