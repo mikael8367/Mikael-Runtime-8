@@ -79,7 +79,12 @@ if [[ "$BUILD_IOS" != "1" ]]; then
   test "$(git -C termux-elf-cleaner rev-parse HEAD)" = "{ELF_CLEANER_COMMIT}"
   pushd termux-elf-cleaner
   autoreconf --install
-  ./configure
+  # This is a host utility that runs on the Ubuntu runner, not on Android.
+  # Do not inherit the Android cross-toolchain from setdevkitpath.sh.
+  env -u CC -u CXX -u CPP -u AR -u AS -u LD -u NM -u RANLIB -u STRIP \\
+      -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u LDFLAGS \\
+      CC=cc CXX=c++ AR=ar RANLIB=ranlib \\
+      ./configure --build="$(./config.guess)"
   make
   popd
   clean_elfs() {{
