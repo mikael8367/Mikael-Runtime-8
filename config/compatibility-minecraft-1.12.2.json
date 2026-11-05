@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "target-not-yet-verified",
+  "target": {
+    "minecraftVersion": "1.12.2",
+    "javaMajor": 8,
+    "maximumClassFileMajorVersion": 52,
+    "architecture": "aarch64",
+    "forgeVersion": "14.23.5.2864"
+  },
+  "optifine": {
+    "enabledAsOptionalLayer": true,
+    "referenceBuild": "HD_U_G5",
+    "requiresForgeCombinationTest": true
+  },
+  "modLoading": {
+    "loader": "Forge Mod Loader",
+    "legacyLaunchWrapper": true,
+    "preserveLauncherClasspathOrder": true,
+    "doNotFilterModLibraries": true,
+    "resolveDependenciesThroughLauncher": true
+  },
+  "modpacks": {
+    "allowMultipleMods": true,
+    "preserveGameDirectory": true,
+    "preserveConfigAndOverrides": true,
+    "preserveAllDeclaredLibraries": true,
+    "checkNativeLibraryAbi": true,
+    "largeClasspathMustBeMeasured": true
+  },
+  "native": {
+    "requiredAbi": "aarch64",
+    "jniRequired": true,
+    "lwjglNativeLibraries": "provided-and-extracted-by-launcher",
+    "graphicsRenderer": "provided-by-launcher"
+  },
+  "launchers": [
+    "FCL",
+    "CS Launcher Plus"
+  ],
+  "acceptanceStages": [
+    "minecraft-1.12.2-vanilla",
+    "forge-14.23.5.2864",
+    "optifine-hd-u-g5-alone",
+    "forge-plus-optifine-hd-u-g5",
+    "small-mod-set",
+    "large-modpack",
+    "launcher-fcl",
+    "launcher-cs-launcher-plus"
+  ],
+  "limitations": [
+    "Java 8 compatibility does not guarantee every mod is compatible with every other mod.",
+    "OptiFine and Forge compatibility depends on exact builds and mod combinations.",
+    "The runtime does not replace the launcher's mod loader, dependency resolver, asset manager, or graphics renderer.",
+    "Every native library loaded by the game must match Android and the target ABI.",
+    "Large modpacks must be tested for classpath length, memory pressure, startup time, and native-library extraction."
+  ]
+}
