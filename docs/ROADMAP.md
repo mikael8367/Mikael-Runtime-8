@@ -6,6 +6,9 @@
 - [x] Criar validador do perfil Minecraft 1.12.2.
 - [x] Criar testes de regressão para regras do perfil.
 - [x] Executar validações de perfil automaticamente no GitHub Actions.
+- [x] Documentar o contrato MultiRT do CS Launcher Plus.
+- [x] Criar empacotador e testes do arquivo de runtime compatível com CS Launcher Plus.
+- [ ] Confirmar os testes no GitHub Actions.
 - [ ] Confirmar execução verde do workflow no GitHub.
 
 ## Marco 1 — Escolha e reprodução da base Java 8
