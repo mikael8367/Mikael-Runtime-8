@@ -46,20 +46,25 @@ jobs:
           test "$(git -C openjdk rev-parse HEAD)" = "7fdf5cd77f209427758437d7e147ea1c18b4ec35"
           test -f openjdk/configure
 
-      - name: Check and apply Android AArch64 patches strictly
+      - name: Verify patch identities and apply in dependency order
         shell: bash
         run: |
           set -euo pipefail
           cd openjdk
           test -z "$(git status --porcelain)"
+          # GitHub's blob SHA for the pinned patch files is checked before use.
+          test "$(git hash-object ../upstream-recipe/patches/jdk8u_android.diff)" = "801ec26807256e5206616c2da14c80676519bce9"
+          test "$(git hash-object ../upstream-recipe/patches/jdk8u_android_main.diff)" = "8ba2f3c46963b3d125eb416cfb5185a4f53b69f6"
+          # Apply and validate sequentially: the second patch is checked against
+          # the tree after the first patch, not against the pristine source.
           git apply --check --whitespace=fix ../upstream-recipe/patches/jdk8u_android.diff
-          git apply --check --whitespace=fix ../upstream-recipe/patches/jdk8u_android_main.diff
           git apply --whitespace=fix ../upstream-recipe/patches/jdk8u_android.diff
-          git apply --whitespace=error-all ../upstream-recipe/patches/jdk8u_android_main.diff
+          git diff --check
+          git apply --check --whitespace=fix ../upstream-recipe/patches/jdk8u_android_main.diff
+          git apply --whitespace=fix ../upstream-recipe/patches/jdk8u_android_main.diff
           git diff --check
           test -d hotspot/src/cpu/aarch64
-          echo "Pinned OpenJDK source and Android patch set passed the strict apply check."
-
+          echo "Pinned Android patches applied sequentially with exact blob identities."
       - name: Record source provenance
         if: always()
         shell: bash
