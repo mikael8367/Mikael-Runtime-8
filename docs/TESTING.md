@@ -61,7 +61,6 @@ Antes de marcar uma versão como estável:
 | Tempo de inicialização | |
 | Resultado / logs | |
 
-
 ## 5. Compatibilidade com mods e modpacks
 
 Consultar [MOD_COMPATIBILITY.md](MOD_COMPATIBILITY.md) e validar o contrato com:
@@ -84,7 +83,6 @@ Em cada execução, registrar a lista e versão dos mods, classpath efetivo, arg
 
 **Não declarar compatibilidade universal:** um contrato validado apenas prova que a estrutura esperada está configurada. Só testes reais demonstram que uma build específica do Forge, OptiFine ou modpack funciona.
 
-
 ## 6. Kit de diagnóstico executável no Android
 
 O projeto fornece um JAR de diagnóstico Java 8 em `tests/device-smoke/`. Ele é compilado pelo workflow `Build Android Runtime Test Kit` e publicado como artefato ZIP do GitHub Actions. No celular, baixe o artefato na aba Actions, extraia e siga `LEIA-ME.md`.
@@ -98,3 +96,16 @@ java -jar MikaelRuntimeSmokeTest.jar
 Guarde toda a saída. O kit verifica versão Java, arquitetura, reflexão, threads, heap/GC, arquivos UTF-8 e ZIP/JAR. As verificações de classes Forge/LaunchWrapper são informativas e dependem do classpath usado.
 
 **Limite:** esse teste preliminar verifica a runtime que foi usada para executar o JAR. Não testa uma Mikael Runtime 8 própria enquanto ela não existir como binário, e não comprova compatibilidade gráfica ou de modpacks.
+
+## 7. Validação automática do futuro pacote JRE
+
+Antes de disponibilizar uma runtime para instalação, executar:
+
+```bash
+python scripts/package_cslauncher_runtime.py /caminho/da/jre8-arm64 mikael-runtime8-arm64.tar.xz
+python -m unittest discover -s tests -v
+```
+
+O empacotador rejeita metadados diferentes de Java 8/ARM64, ausência de `bin/java`, ausência de `libjvm.so`, executável sem permissão e bibliotecas nativas que não sejam ELF64 little-endian AArch64. Também reabre o `.tar.xz` e verifica a estrutura raiz, os cabeçalhos ELF e caminhos inseguros.
+
+Os testes automatizados usam arquivos ELF sintéticos para cobrir os casos válidos e inválidos. **Eles não são uma JVM e não certificam compatibilidade Android/Bionic.** A confirmação final exige executar `java -version`, o smoke test e Minecraft no telefone. A pipeline de CI executa os testes unitários em cada push na branch principal.
