@@ -67,6 +67,14 @@ fi'''
         with self.assertRaises(ValueError):
             inject_toolchain_smoke_test("  ./maketoolchain.sh\n  ./maketoolchain.sh\n")
 
+    def test_elf_cleaner_is_built_for_runner_not_android(self):
+        scripts = hardened_scripts()
+        cleaner = scripts["tarjdk.sh"]
+        self.assertIn("env -u CC -u CXX", cleaner)
+        self.assertIn("CC=cc CXX=c++ AR=ar RANLIB=ranlib", cleaner)
+        self.assertIn('./configure --build="$(./config.guess)"', cleaner)
+        self.assertIn("make", cleaner)
+
     def test_branding_patch_does_not_depend_on_stale_update_version(self):
         patch = compatible_branding_patch()
         self.assertIn('PRODUCT_NAME=OpenJDK', patch)
