@@ -4,7 +4,7 @@ O workflow \`.github/workflows/build-mikael-runtime8-arm64.yml\` compila uma JRE
 
 ## O que o pipeline faz
 
-1. Usa runner Ubuntu 22.04 e JDK 8 de bootstrap.
+1. Usa runner Ubuntu 24.04 (GLIBC 2.39) e JDK 8 de bootstrap; o GCC 13 ARM64 fixado exige GLIBC >= 2.38.
 2. Busca a receita MojoLauncher no commit imutável \`a0d811b6c5ebd251374751438ec8b635f0746ab4\`.
 3. Verifica os hashes dos patches Android usados.
 4. Reescreve os scripts de aquisição para fixar OpenJDK 8u, FreeType, CUPS, GCC toolchain e termux-elf-cleaner.
