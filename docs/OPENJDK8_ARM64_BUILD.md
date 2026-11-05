@@ -40,3 +40,17 @@ O workflow atual **não compila a JVM nem produz JRE**. Ele confirma se a combin
 Um build verde de CI não prova execução no telefone. Binários AArch64 Linux genéricos não são automaticamente compatíveis com Android/Bionic. A runtime também não fornece LWJGL, GL4ES, assets, classpath ou loader de mods: esses componentes continuam sob responsabilidade do launcher e do ambiente gráfico.
 
 Nenhum APK é produzido nesta etapa.
+
+## Como acompanhar a validação no celular
+
+1. Abra [Actions](https://github.com/mikael8367/Mikael-Runtime-8/actions).
+2. Entre em **OpenJDK 8 ARM64 source preflight**.
+3. Abra a execução mais recente e confira se o job `source-preflight` terminou como `success`.
+4. Em **Artifacts**, baixe `MikaelRuntime8-OpenJDK8-ARM64-Preflight`.
+5. Dentro do ZIP, confira `openjdk-source-preflight.txt`, `android-patch-diff-stat.txt` e `android-patch-files.txt`.
+
+Se o job falhar, abra o job e copie o trecho do primeiro passo vermelho e o erro completo. Não tente compilar ou instalar os patches manualmente no celular.
+
+**O que esse teste permite concluir:** se as revisões fixadas foram baixadas e os dois patches principais aplicaram sequencialmente à árvore OpenJDK selecionada, sem rejeições.
+
+**O que ainda não permite concluir:** não compila a JVM, não gera `.tar.xz`, não prova que o HotSpot inicia no Android e não testa Minecraft/Forge/OptiFine. Para isso, ainda precisamos concluir a toolchain e o build ARM64 real.
