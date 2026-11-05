@@ -128,7 +128,9 @@ def _archive_member_errors(member_list: list[tarfile.TarInfo]) -> list[str]:
         if name in seen:
             errors.append(f"Duplicate archive path: {name}")
         seen.add(name)
-        if not name or path.is_absolute() or ".." in path.parts or "." in path.parts or "\\\\" in name:
+        canonical_name = name.rstrip("/") if member.isdir() else name
+        if (not name or path.is_absolute() or ".." in path.parts or "." in path.parts
+                or "\\\\" in name or posixpath.normpath(canonical_name) != canonical_name):
             errors.append(f"Unsafe archive path: {name}")
         if not (member.isfile() or member.isdir() or member.issym()):
             errors.append(f"Unsupported archive entry type: {name}")
