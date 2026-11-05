@@ -32,9 +32,9 @@ After a real Java 8 ARM64 JRE has been compiled, run:
 python scripts/package_cslauncher_runtime.py /path/to/jre8-arm64 mikael-runtime8-cslauncher-arm64.tar.xz
 ```
 
-The packager checks Java version and architecture metadata, executable presence, ELF class/endianness/AArch64 machine ID for `bin/java` and every native `.so`, and the presence and architecture of HotSpot `libjvm.so`. It creates the archive with JRE contents at its root, reopens it, and validates the archive layout and ELF headers. It rejects symlinks that escape the JRE source directory and unsafe archive paths.
+The packager checks Java version and architecture metadata, executable presence, ELF class/endianness/AArch64 machine ID for `bin/java` and every native `.so`, and the presence and architecture of HotSpot `libjvm.so`. It creates the archive with JRE contents at its root, reopens it, and validates the archive layout and ELF headers. It rejects source symlinks that escape the JRE, special files, archive symlink escapes, non-canonical/traversal paths, duplicate entries, and hard links or other unsupported tar entry types.
 
-Automated regression tests use synthetic ELF headers to exercise valid ARM64, wrong-machine, non-ELF and metadata cases. They test the packaging gate only; they do not emulate or certify a real JVM.
+Automated regression tests use synthetic ELF headers to exercise valid ARM64, wrong-machine, non-ELF and metadata cases. They cover the packaging gate, including source symlink escapes and unsafe archive entry types; they do not emulate or certify a real JVM.
 
 ## Installation status
 
