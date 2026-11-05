@@ -68,7 +68,7 @@ Consultar [MOD_COMPATIBILITY.md](MOD_COMPATIBILITY.md) e validar o contrato com:
 
 ```bash
 python scripts/validate_compatibility.py
-python -m unittest tests.test_compatibility -v
+python -m unittest discover -s tests -p 'test_compatibility.py' -v
 ```
 
 Sequência obrigatória no Android ARM64:
