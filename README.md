@@ -4,7 +4,7 @@ Projeto experimental de uma distribuição Java 8 para Android ARM64, com foco e
 
 ## Estado atual
 
-**Ainda não existe JVM compilada, JRE instalável ou runtime pronta para selecionar no launcher.** O projeto possui perfil experimental, validadores, testes, auditorias de fonte/patches e kits de diagnóstico. Esses componentes não substituem uma JVM.
+**A primeira pipeline de compilação própria foi adicionada, mas ainda não existe binário JVM/JRE confirmado.** O resultado só será considerado runtime quando o GitHub Actions compilar, validar e empacotar a JRE e ela ainda passar por testes no Android real.
 
 ## O que já existe
 
@@ -13,19 +13,24 @@ Projeto experimental de uma distribuição Java 8 para Android ARM64, com foco e
 - Testes automatizados de regressão e empacotamento.
 - Pré-verificação dos patches Android sobre OpenJDK 8u.
 - Auditoria da receita histórica Pojav e auditoria da receita atual MojoLauncher.
+- Preparador de receita de build com commits e hashes fixados.
+- Pipeline de compilação HotSpot Server ARM64 no GitHub Actions.
 - Validador/empacotador MultiRT para CS Launcher Plus.
-- Kit de diagnóstico Java 8 para testar uma runtime que já exista.
+- Kit de diagnóstico Java 8 para teste no aparelho.
 
-## Base de compilação investigada
+## Pipeline de compilação
 
-Foi localizado o fork ativo [MojoLauncher/android-openjdk-build-multiarch](https://github.com/MojoLauncher/android-openjdk-build-multiarch), com workflow de build para AArch64 e publicação de JRE 8 de referência. A receita ainda tem riscos que precisam ser corrigidos antes de executá-la neste projeto. Consulte [docs/MOJO_OPENJDK8_RECIPE_REVIEW.md](docs/MOJO_OPENJDK8_RECIPE_REVIEW.md).
+O workflow [Build Mikael Runtime 8 ARM64](.github/workflows/build-mikael-runtime8-arm64.yml) prepara a receita MojoLauncher de forma controlada, fixa OpenJDK 8u e dependências, verifica o NDK r10e, aplica patches de forma estrita, compila HotSpot Server AArch64 e valida o pacote no formato MultiRT.
+
+A pipeline ainda precisa executar com sucesso. Consulte [docs/ARM64_REAL_BUILD.md](docs/ARM64_REAL_BUILD.md) para os pinos e critérios. A auditoria da receita está em [docs/MOJO_OPENJDK8_RECIPE_REVIEW.md](docs/MOJO_OPENJDK8_RECIPE_REVIEW.md).
 
 ## Validar pelo celular
 
 - [Actions do projeto](https://github.com/mikael8367/Mikael-Runtime-8/actions)
-- Workflow **Audit maintained OpenJDK 8 ARM64 recipe**: confere a identidade da receita e gera relatório de riscos; não compila JVM.
-- Workflow **OpenJDK 8 ARM64 source preflight**: verifica a fonte OpenJDK e aplicação sequencial dos patches; não compila JVM.
-- Workflow **Build Android Runtime Test Kit**: gera apenas o JAR de diagnóstico; não contém JVM.
+- Workflow **Build Mikael Runtime 8 ARM64**: compilação real; o artifact só aparece se todos os passos de build e empacotamento forem aprovados.
+- Workflow **Audit maintained OpenJDK 8 ARM64 recipe**: auditoria estática, não compila JVM.
+- Workflow **OpenJDK 8 ARM64 source preflight**: pré-verificação de fonte e patches, não compila JVM.
+- Workflow **Build Android Runtime Test Kit**: gera apenas o JAR de diagnóstico.
 
 ## Critérios para chamar de runtime válida
 
@@ -34,14 +39,14 @@ Foi localizado o fork ativo [MojoLauncher/android-openjdk-build-multiarch](https
 3. Aplicar todos os patches sem rejeições ou aplicação parcial.
 4. Validar ELF64/AArch64, ABI, símbolos e dependências dinâmicas.
 5. Empacotar JRE no formato aceito pelo launcher, com manifesto e SHA-256.
-6. Executar `java -version`, JNI, threads, GC e smoke tests no Android real.
+6. Executar java -version, JNI, threads, GC e smoke tests no Android real.
 7. Testar FCL/CS Launcher Plus e Minecraft 1.12.2 com Forge, OptiFine e modpack.
 
 A compatibilidade com mods e OptiFine só será declarada depois desses testes. A JVM não substitui LWJGL, GL4ES, assets, classpath ou o loader do launcher.
 
 ## Objetivos
 
-- Android `arm64-v8a` / AArch64.
+- Android arm64-v8a / AArch64.
 - Java 8 para Minecraft 1.12.2.
 - Compatibilidade progressiva com Forge, OptiFine, mods e modpacks.
 - Integração com FCL e CS Launcher Plus.

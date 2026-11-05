@@ -1,0 +1,136 @@
+name: Build Mikael Runtime 8 ARM64
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-mikael-runtime8-arm64.yml"
+      - "scripts/prepare_mojo_openjdk8_build.py"
+      - "scripts/package_cslauncher_runtime.py"
+      - "tests/test_prepare_mojo_openjdk8_build.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mikael-runtime8-arm64-build
+  cancel-in-progress: false
+
+jobs:
+  build-arm64:
+    name: Compile OpenJDK 8 HotSpot Server for Android ARM64
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout Mikael Runtime 8
+        uses: actions/checkout@v4
+
+      - name: Install bootstrap JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "8"
+
+      - name: Install native build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            autoconf automake libtool pkg-config python3 python-is-python3 \
+            unzip zip xz-utils curl git make gcc g++ gcc-multilib g++-multilib \
+            systemtap-sdt-dev libxtst-dev libasound2-dev libelf-dev \
+            libfontconfig1-dev libx11-dev libxrender-dev libxt-dev libxext-dev \
+            binutils file ca-certificates
+
+      - name: Verify build preparation tests
+        run: python3 -m unittest discover -s tests -p 'test_prepare_mojo_openjdk8_build.py' -v
+
+      - name: Fetch exact MojoLauncher build recipe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init mojo-recipe
+          git -C mojo-recipe remote add origin https://github.com/MojoLauncher/android-openjdk-build-multiarch.git
+          git -C mojo-recipe fetch --depth 1 origin a0d811b6c5ebd251374751438ec8b635f0746ab4
+          git -C mojo-recipe checkout --detach FETCH_HEAD
+          test "$(git -C mojo-recipe rev-parse HEAD)" = "a0d811b6c5ebd251374751438ec8b635f0746ab4"
+
+      - name: Harden recipe and pin OpenJDK source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_mojo_openjdk8_build.py --recipe-dir mojo-recipe
+          bash -n mojo-recipe/buildjdk.sh
+          for file in clonejdk.sh getlibs.sh maketoolchain.sh tarjdk.sh; do
+            bash -n "mojo-recipe/$file"
+          done
+          if grep -R -nE 'git apply --reject|action-tmate|\|\| echo' mojo-recipe/buildjdk.sh mojo-recipe/.github/workflows/build.yml; then
+            echo "Unsafe upstream build behavior remains." >&2
+            exit 1
+          fi
+
+      - name: Download and verify Android NDK r10e
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd mojo-recipe
+          curl --fail --location --retry 3 \
+            --output android-ndk-r10e-linux-x86_64.zip \
+            https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip
+          echo "ee5f405f3b57c4f5c3b3b8b5d495ae12b660e03d2112e4ed5c728d349f1e520c  android-ndk-r10e-linux-x86_64.zip" | sha256sum --check
+          unzip -q android-ndk-r10e-linux-x86_64.zip
+          test -x android-ndk-r10e/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/aarch64-linux-android/bin/strip
+          rm android-ndk-r10e-linux-x86_64.zip
+
+      - name: Compile OpenJDK 8 HotSpot Server AArch64
+        shell: bash
+        working-directory: mojo-recipe
+        run: |
+          set -euo pipefail
+          java -version
+          bash ci_build_arch_aarch64.sh
+          output="$(find . -maxdepth 1 -type f -name 'jre8-arm64-*-release.tar.xz' -print -quit)"
+          test -n "$output"
+          test -s "$output"
+          echo "JRE_TARBALL=$output" >> "$GITHUB_ENV"
+
+      - name: Validate and package CS Launcher Plus runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build-output/jre
+          tar -xJf "mojo-recipe/$JRE_TARBALL" -C build-output/jre
+          python3 scripts/package_cslauncher_runtime.py \
+            build-output/jre build-output/Mikael-Runtime-8-Android-ARM64.tar.xz
+          readelf -h build-output/jre/bin/java | tee build-output/java-elf-header.txt
+          readelf -h build-output/jre/lib/aarch64/server/libjvm.so | tee build-output/libjvm-elf-header.txt
+          readelf -d build-output/jre/lib/aarch64/server/libjvm.so > build-output/libjvm-dynamic-dependencies.txt
+          grep -q 'AArch64' build-output/java-elf-header.txt
+          grep -q 'AArch64' build-output/libjvm-elf-header.txt
+          sha256sum build-output/Mikael-Runtime-8-Android-ARM64.tar.xz > build-output/SHA256SUMS
+          {
+            echo "Build: Mikael Runtime 8 ARM64"
+            echo "Recipe commit: a0d811b6c5ebd251374751438ec8b635f0746ab4"
+            echo "OpenJDK commit: b661ee6ff840d6922aa7424a4d8f24760b21cf26"
+            echo "Architecture: AArch64 / ELF64"
+            echo "VM: HotSpot Server"
+            echo "Device execution: NOT YET VERIFIED"
+            echo "Minecraft/Forge/OptiFine: NOT YET VERIFIED"
+            cat build-output/SHA256SUMS
+          } > build-output/BUILD-MANIFEST.txt
+
+      - name: Upload compiled runtime artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mikael-Runtime-8-Android-ARM64
+          path: |
+            build-output/Mikael-Runtime-8-Android-ARM64.tar.xz
+            build-output/SHA256SUMS
+            build-output/BUILD-MANIFEST.txt
+            build-output/java-elf-header.txt
+            build-output/libjvm-elf-header.txt
+            build-output/libjvm-dynamic-dependencies.txt
+          if-no-files-found: error
+          retention-days: 30
