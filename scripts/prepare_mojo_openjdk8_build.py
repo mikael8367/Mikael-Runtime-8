@@ -14,6 +14,7 @@ PATCH_BLOBS = {
     "jdk8u_android_branding.diff": "ba84685b24586d4794e7822f2927f62e960f0c4e",
     "jdk8u_android_main.diff": "8ba2f3c46963b3d125eb416cfb5185a4f53b69f6",
     "mikael_android_parallel_gc.diff": "46f5cec59df926f869de7847246ea841e8865c47",
+    "mikael_android_adaptive_heap.diff": "9abd008332a0e4451f486b12e3872bac42e50e26",
 }
 FREETYPE_COMMIT = "6a2b3e4007e794bfc6c91030d0ed987f925164a8"
 CUPS_COMMIT = "070e33a4c9dfdb21638de0fedb2904391c30d070"
@@ -182,13 +183,14 @@ def inject_toolchain_smoke_test(global_text: str) -> str:
 
 def strict_patch_block() -> str:
     return """# Apply the pinned Android patch set strictly; any mismatch aborts the build.
-for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.diff mikael_android_parallel_gc.diff; do
+for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.diff mikael_android_parallel_gc.diff mikael_android_adaptive_heap.diff; do
   expected=""
   case "$patch" in
     jdk8u_android.diff) expected="35137738d48cee5fbcbd41d335d3414ee4a6f91f" ;;
     jdk8u_android_branding.diff) expected="ba84685b24586d4794e7822f2927f62e960f0c4e" ;;
     jdk8u_android_main.diff) expected="8ba2f3c46963b3d125eb416cfb5185a4f53b69f6" ;;
     mikael_android_parallel_gc.diff) expected="46f5cec59df926f869de7847246ea841e8865c47" ;;
+    mikael_android_adaptive_heap.diff) expected="9abd008332a0e4451f486b12e3872bac42e50e26" ;;
   esac
   actual="$(git hash-object "../patches/$patch")"
   test "$actual" = "$expected"
@@ -212,10 +214,10 @@ def prepare(recipe_dir: Path, openjdk_commit: str = OPENJDK_COMMIT) -> None:
         raise ValueError(f"Unexpected recipe commit: {head}; expected {RECIPE_COMMIT}")
     for filename, expected in PATCH_BLOBS.items():
         path = recipe_dir / "patches" / filename
-        if filename == "mikael_android_parallel_gc.diff":
+        if filename.startswith("mikael_android_"):
             source_path = Path(__file__).resolve().parents[1] / "patches" / filename
             if not source_path.is_file() or git_blob_sha(source_path.read_bytes()) != expected:
-                raise ValueError(f"Project performance patch missing or changed: {filename}")
+                raise ValueError(f"Project Android tuning patch missing or changed: {filename}")
             path.write_bytes(source_path.read_bytes())
         if not path.is_file() or git_blob_sha(path.read_bytes()) != expected:
             raise ValueError(f"Patch missing or changed: {filename}")
