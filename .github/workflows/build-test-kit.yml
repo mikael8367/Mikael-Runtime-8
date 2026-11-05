@@ -1,0 +1,52 @@
+name: Build Android Runtime Test Kit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tests/device-smoke/**"
+      - ".github/workflows/build-test-kit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-kit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+      - name: Compile Java 8 diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/device-smoke/classes
+          javac -source 8 -target 8 -encoding UTF-8 \
+            -d build/device-smoke/classes \
+            tests/device-smoke/src/com/mikael/runtimecheck/RuntimeSmokeTest.java
+          printf 'Main-Class: com.mikael.runtimecheck.RuntimeSmokeTest\n' > build/device-smoke/manifest.mf
+          jar cfm build/device-smoke/MikaelRuntimeSmokeTest.jar \
+            build/device-smoke/manifest.mf -C build/device-smoke/classes .
+          javap -verbose -classpath build/device-smoke/MikaelRuntimeSmokeTest.jar \
+            com.mikael.runtimecheck.RuntimeSmokeTest | grep 'major version: 52'
+      - name: Prepare phone-friendly test kit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/test-kit
+          cp build/device-smoke/MikaelRuntimeSmokeTest.jar build/test-kit/
+          cp tests/device-smoke/ANDROID_TEST_GUIDE.md build/test-kit/LEIA-ME.md
+          sha256sum build/test-kit/MikaelRuntimeSmokeTest.jar > build/test-kit/SHA256SUMS.txt
+          cd build && zip -r MikaelRuntime8-Device-Test-Kit.zip test-kit
+      - name: Upload test kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: MikaelRuntime8-Device-Test-Kit
+          path: build/MikaelRuntime8-Device-Test-Kit.zip
+          if-no-files-found: error
+          retention-days: 30
