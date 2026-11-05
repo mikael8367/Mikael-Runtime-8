@@ -99,7 +99,7 @@ def validate_compatibility(data: Any) -> list[str]:
             errors.append("O renderizador gráfico precisa ser fornecido pelo launcher.")
 
     launchers = data["launchers"]
-    if not isinstance(launchers, list) or not {"FCL", "CS Launcher Plus"}.issubset(launchers):
+    if not isinstance(launchers, list) or not all(isinstance(item, str) for item in launchers) or not {"FCL", "CS Launcher Plus"}.issubset(launchers):
         errors.append("launchers precisa incluir FCL e CS Launcher Plus.")
 
     stages = data["acceptanceStages"]
@@ -109,7 +109,7 @@ def validate_compatibility(data: Any) -> list[str]:
         "small-mod-set", "large-modpack", "launcher-fcl",
         "launcher-cs-launcher-plus",
     }
-    if not isinstance(stages, list) or not required_stages.issubset(stages):
+    if not isinstance(stages, list) or not all(isinstance(item, str) for item in stages) or not required_stages.issubset(stages):
         errors.append("acceptanceStages não contém todas as etapas obrigatórias.")
 
     limitations = data["limitations"]
