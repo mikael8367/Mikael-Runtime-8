@@ -31,17 +31,26 @@ jobs:
           test -s docs/ROADMAP.md
           test -s docs/TESTING.md
           test -s docs/CS_LAUNCHER_PLUS_COMPAT.md
+          test -s docs/MOD_COMPATIBILITY.md
           test -s config/minecraft-1.12.2.json
+          test -s config/compatibility-minecraft-1.12.2.json
           test -s scripts/validate_profile.py
+          test -s scripts/validate_compatibility.py
           test -s scripts/package_cslauncher_runtime.py
           test -s tests/test_profile.py
+          test -s tests/test_compatibility.py
           test -s tests/test_cslauncher_package.py
 
       - name: Validate JSON syntax
-        run: python -m json.tool config/minecraft-1.12.2.json > /dev/null
+        run: |
+          python -m json.tool config/minecraft-1.12.2.json > /dev/null
+          python -m json.tool config/compatibility-minecraft-1.12.2.json > /dev/null
 
-      - name: Validate profile rules
+      - name: Validate runtime profile
         run: python scripts/validate_profile.py
+
+      - name: Validate Minecraft compatibility contract
+        run: python scripts/validate_compatibility.py
 
       - name: Run regression tests
         run: python -m unittest discover -s tests -v
