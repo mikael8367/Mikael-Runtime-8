@@ -47,6 +47,14 @@ class CompatibilityContractTests(unittest.TestCase):
         self.contract["status"] = "stable"
         self.assertTrue(any("target-not-yet-verified" in error for error in validate_compatibility(self.contract)))
 
+    def test_rejects_non_string_launcher_entries_without_crashing(self):
+        self.contract["launchers"] = [[]]
+        self.assertTrue(validate_compatibility(self.contract))
+
+    def test_rejects_non_string_stage_entries_without_crashing(self):
+        self.contract["acceptanceStages"] = [[]]
+        self.assertTrue(validate_compatibility(self.contract))
+
     def test_rejects_non_object_root(self):
         self.assertTrue(validate_compatibility([]))
 
