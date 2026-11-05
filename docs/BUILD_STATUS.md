@@ -34,3 +34,10 @@ O diff principal foi recuperado por SHA e inventariado: 207 caminhos, 58.398 lin
 ## Próxima entrega técnica
 
 A próxima etapa é corrigir os achados prioritários em uma cópia controlada dos patches, revisar licenças/proveniência e só então preparar um build reproduzível. Só depois disso deve ser criado um workflow de build e publicação de artefatos. Nenhum APK será gerado sem pedido explícito.
+
+
+## Kit de diagnóstico para teste no celular
+
+Foi adicionado `tests/device-smoke/` com um programa Java 8 e o workflow `.github/workflows/build-test-kit.yml`. O workflow compila o JAR de diagnóstico e publica um ZIP por 30 dias em GitHub Actions. Esse pacote não contém JVM/JRE e não é instalável como runtime; ele permite testar uma JRE Java 8 ARM64 já disponível no aparelho e coletar um primeiro relatório.
+
+A Mikael Runtime 8 própria continua sem binário. Não publicar o kit como se fosse a runtime.
