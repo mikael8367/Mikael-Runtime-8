@@ -6,7 +6,7 @@ Ainda não existe binário JVM/JRE produzido neste repositório. O pipeline atua
 
 ## Nova referência de compilação localizada
 
-Foi identificado o fork ativo `MojoLauncher/android-openjdk-build-multiarch`, commit observado `c213846ff125eccf43e6be4adf827e42c579c4ab`. Ele contém workflow de compilação OpenJDK 8 para AArch64 e publica um pacote JRE 8 de referência. Detalhes e riscos em [MOJO_OPENJDK8_RECIPE_REVIEW.md](MOJO_OPENJDK8_RECIPE_REVIEW.md).
+Foi identificado o fork ativo `MojoLauncher/android-openjdk-build-multiarch`, commit observado `a0d811b6c5ebd251374751438ec8b635f0746ab4`. Ele contém workflow de compilação OpenJDK 8 para AArch64 e publica um pacote JRE 8 de referência. Detalhes e riscos em [MOJO_OPENJDK8_RECIPE_REVIEW.md](MOJO_OPENJDK8_RECIPE_REVIEW.md).
 
 A receita ainda tolera falhas de patch, clona OpenJDK sem SHA, baixa NDK e dependências sem verificação SHA-256 e inicia tmate no CI. A auditoria automatizada foi adicionada, mas não executa esses scripts. Portanto, a descoberta não libera o build completo.
 

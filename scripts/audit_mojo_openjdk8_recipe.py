@@ -7,7 +7,7 @@ import hashlib
 import subprocess
 from pathlib import Path
 
-PINNED_COMMIT = "c213846ff125eccf43e6be4adf827e42c579c4ab"
+PINNED_COMMIT = "a0d811b6c5ebd251374751438ec8b635f0746ab4"
 EXPECTED_BLOBS = {
     ".github/workflows/build.yml": "0341c899c368dd3021f175ee98fbaa7004f17742",
     "README.md": "44784c1587c859b662936f189a690e507467af9f",

@@ -7,7 +7,7 @@ Em 2026-11-05 foi localizado um fork ativo da receita histórica: [MojoLauncher/
 Revisão usada nesta auditoria:
 - Repositório: `MojoLauncher/android-openjdk-build-multiarch`
 - Branch observada: `buildjre8`
-- Commit observado: `c213846ff125eccf43e6be4adf827e42c579c4ab`
+- Commit observado: `a0d811b6c5ebd251374751438ec8b635f0746ab4`
 - Workflow: `.github/workflows/build.yml`
 - Arquitetura alvo: `aarch64`
 - Runner upstream: Ubuntu 22.04

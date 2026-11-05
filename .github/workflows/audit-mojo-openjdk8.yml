@@ -32,12 +32,12 @@ jobs:
           set -euo pipefail
           git init mojo-recipe
           git -C mojo-recipe remote add origin https://github.com/MojoLauncher/android-openjdk-build-multiarch.git
-          git -C mojo-recipe fetch --depth 1 origin c213846ff125eccf43e6be4adf827e42c579c4ab
+          git -C mojo-recipe fetch --depth 1 origin a0d811b6c5ebd251374751438ec8b635f0746ab4
           git -C mojo-recipe checkout --detach FETCH_HEAD
-          test "$(git -C mojo-recipe rev-parse HEAD)" = "c213846ff125eccf43e6be4adf827e42c579c4ab"
+          test "$(git -C mojo-recipe rev-parse HEAD)" = "a0d811b6c5ebd251374751438ec8b635f0746ab4"
 
       - name: Run audit regression tests
-        run: python3 -m unittest tests.test_mojo_openjdk8_recipe_audit -v
+        run: python3 -m unittest discover -s tests -p 'test_mojo_openjdk8_recipe_audit.py' -v
 
       - name: Audit pinned upstream scripts without executing them
         run: |

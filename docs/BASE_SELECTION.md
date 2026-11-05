@@ -4,7 +4,7 @@
 
 Foi localizado o fork ativo [MojoLauncher/android-openjdk-build-multiarch](https://github.com/MojoLauncher/android-openjdk-build-multiarch), atualizado em 2026-10-22. A revisão desta data usa o commit imutável observado:
 
-`c213846ff125eccf43e6be4adf827e42c579c4ab`
+`a0d811b6c5ebd251374751438ec8b635f0746ab4`
 
 O fork mantém workflow para compilar OpenJDK 8 para AArch64 e publicar um JRE de referência usado pelo ecossistema Pojav/Mojo. Isso é uma rota concreta para reproduzir a compilação, mas não prova por si só que o pacote seja compatível com CS Launcher Plus ou com o aparelho do usuário.
 
