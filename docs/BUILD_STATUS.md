@@ -29,8 +29,8 @@ A revisão estática inicial está registrada em [OPENJDK8_SOURCE_AUDIT.md](OPEN
 
 ## Revisão dos patches Android
 
-A revisão parcial está em [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md). Foram examinados os diffs pequenos de syscalls/Bionic, `dlvsym`, `loadavg`, AArch32 e page trap. O patch principal `jdk8u_android.diff` tem 2.383.172 bytes; a interface de leitura não disponibilizou seu conteúdo integral, então ele permanece explicitamente pendente. Não foi feita aprovação de GC, JIT, JNI, Java2D ou compatibilidade geral.
+O diff principal foi recuperado por SHA e inventariado: 207 caminhos, 58.398 linhas adicionadas e 114 removidas. Consulte [OPENJDK8_ANDROID_PATCH_REVIEW.md](OPENJDK8_ANDROID_PATCH_REVIEW.md), [OPENJDK8_PATCH_FINDINGS.md](OPENJDK8_PATCH_FINDINGS.md) e [OPENJDK8_PATCH_INVENTORY.md](OPENJDK8_PATCH_INVENTORY.md). A revisão estática encontrou pontos que bloqueiam a adoção direta, incluindo conversão de texto, coerência AWT/GLX e validação de dados de rede/caminhos nativos. Ainda não houve compilação nem testes no dispositivo.
 
 ## Próxima entrega técnica
 
-A próxima etapa é uma auditoria de proveniência do código OpenJDK e dos scripts upstream, seguida de um teste de compilação controlado. Só depois disso deve ser criado um workflow de build e publicação de artefatos. Nenhum APK será gerado sem pedido explícito.
+A próxima etapa é corrigir os achados prioritários em uma cópia controlada dos patches, revisar licenças/proveniência e só então preparar um build reproduzível. Só depois disso deve ser criado um workflow de build e publicação de artefatos. Nenhum APK será gerado sem pedido explícito.
