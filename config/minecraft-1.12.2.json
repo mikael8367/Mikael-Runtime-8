@@ -1,0 +1,19 @@
+{
+  "profileVersion": 1,
+  "name": "Minecraft Java 1.12.2 - Android ARM64",
+  "javaMajor": 8,
+  "architecture": "aarch64",
+  "minecraftVersion": "1.12.2",
+  "forgeVersion": "14.23.5.2864",
+  "memory": {
+    "initialHeapMb": 512,
+    "maximumHeapMb": 1536,
+    "note": "Ponto de partida experimental, não uma recomendação universal. Ajustar conforme RAM livre, quantidade de mods e estabilidade."
+  },
+  "jvmArguments": [
+    "-Xms512M",
+    "-Xmx1536M"
+  ],
+  "status": "experimental-profile-only",
+  "warning": "Este arquivo não contém uma JVM e não instala uma runtime. Argumentos adicionais só devem ser habilitados após validar suporte na VM Android escolhida."
+}
