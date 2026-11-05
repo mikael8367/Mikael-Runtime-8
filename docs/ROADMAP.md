@@ -4,6 +4,7 @@
 - [x] Criar documentação inicial.
 - [x] Definir escopo e critérios de qualidade.
 - [ ] Registrar a distribuição OpenJDK 8 escolhida e sua licença.
+- [x] Documentar o primeiro candidato OpenJDK 8 Android ARM64 e suas limitações.
 - [ ] Confirmar viabilidade técnica do alvo Android ARM64.
 
 ## Marco 1 — Protótipo Java 8 ARM64
