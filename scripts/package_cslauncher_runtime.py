@@ -15,9 +15,9 @@ ELF_MACHINE_AARCH64 = 183
 
 
 def elf_errors(data: bytes, label: str) -> list[str]:
-    errors: list[str] = []
-    if len(data) < 20 or data[:4] != b"\\x7fELF":
+    if len(data) < 20 or data[:4] != b"\x7fELF":
         return [f"{label} is not a valid ELF file."]
+    errors: list[str] = []
     if data[4] != 2:
         errors.append(f"{label} is not ELF64 (required for ARM64).")
     if data[5] != 1:
@@ -25,6 +25,11 @@ def elf_errors(data: bytes, label: str) -> list[str]:
     if int.from_bytes(data[18:20], "little") != ELF_MACHINE_AARCH64:
         errors.append(f"{label} is not AArch64 (ELF machine must be 183).")
     return errors
+
+
+def read_elf_header(path: Path) -> bytes:
+    with path.open("rb") as stream:
+        return stream.read(64)
 
 
 def validate_jre(root: Path) -> list[str]:
@@ -58,7 +63,7 @@ def validate_jre(root: Path) -> list[str]:
         if not java.stat().st_mode & 0o111:
             errors.append("bin/java is not marked executable.")
         else:
-            errors.extend(elf_errors(java.read_bytes()[:64], "bin/java"))
+            errors.extend(elf_errors(read_elf_header(java), "bin/java"))
 
     if not lib.is_dir():
         errors.append("Missing lib directory.")
@@ -71,11 +76,9 @@ def validate_jre(root: Path) -> list[str]:
     jvm = next((p for p in native_files if p.name == "libjvm.so"), None)
     if jvm is None:
         errors.append("Missing HotSpot VM library libjvm.so under lib/.")
-    else:
-        errors.extend(elf_errors(jvm.read_bytes()[:64], str(jvm.relative_to(root))))
 
     for native in native_files:
-        errors.extend(elf_errors(native.read_bytes()[:64], str(native.relative_to(root))))
+        errors.extend(elf_errors(read_elf_header(native), str(native.relative_to(root))))
     return errors
 
 
@@ -84,7 +87,7 @@ def package_jre(root: Path, output: Path) -> None:
     output = output.resolve()
     errors = validate_jre(root)
     if errors:
-        raise ValueError("\\n".join(errors))
+        raise ValueError("\n".join(errors))
     if output == root or root in output.parents:
         raise ValueError("Output archive must be outside the JRE source directory.")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -102,26 +105,30 @@ def validate_archive(archive_path: Path) -> list[str]:
     try:
         with tarfile.open(archive_path, "r:xz") as archive:
             members = {m.name: m for m in archive.getmembers()}
-            for name, member in members.items():
+            for name in members:
                 path = PurePosixPath(name)
                 if path.is_absolute() or ".." in path.parts:
                     errors.append(f"Unsafe archive path: {name}")
-            if "release" not in members:
-                errors.append("Archive must have release at its root (not inside an extra folder).")
-            if "bin/java" not in members:
-                errors.append("Archive must have bin/java at its root.")
+            if "release" not in members or not members["release"].isfile():
+                errors.append("Archive must have a regular release file at its root.")
+            if "bin/java" not in members or not members["bin/java"].isfile():
+                errors.append("Archive must have a regular bin/java file at its root.")
             if not any(name.startswith("lib/") and name.endswith(".so") for name in members):
                 errors.append("Archive must contain native libraries under lib/.")
-            if not any(PurePosixPath(name).name == "libjvm.so" and name.startswith("lib/") for name in members):
+            if not any(PurePosixPath(name).name == "libjvm.so" and name.startswith("lib/") and m.isfile()
+                       for name, m in members.items()):
                 errors.append("Archive is missing HotSpot libjvm.so under lib/.")
-            release_member = archive.extractfile("release") if "release" in members and members["release"].isfile() else None
-            release_text = release_member.read().decode("utf-8", "replace") if release_member else ""
+
+            release_member = members.get("release")
+            release_stream = archive.extractfile(release_member) if release_member and release_member.isfile() else None
+            release_text = release_stream.read().decode("utf-8", "replace") if release_stream else ""
             version_match = JAVA_VERSION_RE.search(release_text)
             arch_match = OS_ARCH_RE.search(release_text)
             if not version_match or not (version_match.group(1).startswith("1.8.") or version_match.group(1).startswith("8.")):
                 errors.append("Archive release metadata does not identify Java 8.")
             if not arch_match or arch_match.group(1).lower() not in {"aarch64", "arm64"}:
                 errors.append("Archive release metadata does not identify ARM64.")
+
             java_member = members.get("bin/java")
             if java_member and not (java_member.mode & 0o111):
                 errors.append("Archive bin/java is not executable.")
@@ -129,10 +136,9 @@ def validate_archive(archive_path: Path) -> list[str]:
                 if name.startswith("lib/") and name.endswith(".so") and member.isfile():
                     stream = archive.extractfile(member)
                     errors.extend(elf_errors(stream.read(64) if stream else b"", name))
-            for required in ("bin/java",):
-                member = members.get(required)
-                stream = archive.extractfile(member) if member and member.isfile() else None
-                errors.extend(elf_errors(stream.read(64) if stream else b"", required))
+            if java_member and java_member.isfile():
+                stream = archive.extractfile(java_member)
+                errors.extend(elf_errors(stream.read(64) if stream else b"", "bin/java"))
     except (OSError, tarfile.TarError, lzma.LZMAError) as exc:
         errors.append(f"Cannot read .tar.xz archive: {exc}")
     return errors
