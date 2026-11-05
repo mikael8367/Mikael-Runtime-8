@@ -1,12 +1,16 @@
 # Mikael Runtime 8
 
-Distribuição experimental Java 8 para Android ARM64/AArch64, direcionada ao Minecraft Java 1.12.2, com foco em estabilidade e integração com CS Launcher Plus/FCL.
+Distribuição experimental Java 8 para Android ARM64/AArch64, direcionada ao Minecraft Java 1.12.2, com foco em desempenho, estabilidade e integração com CS Launcher Plus/FCL.
 
 ## Estado atual
 
 **A JRE foi compilada, empacotada e executada no Android 12 ARM64.** O primeiro teste real iniciou Minecraft 1.12.2 com Forge 14.23.5.2860, OptiFine HD U G5, LWJGL 2.9.4/GL4ES 1.1.5 e os mods ProjectE, Simple Storage Network e ProjectE Storage Bridge. O mundo singleplayer abriu e foi salvo no encerramento.
 
 Isso comprova o teste funcional inicial, não compatibilidade universal, estabilidade prolongada ou ganho de FPS. O teste ainda não confirma Forge 14.23.5.2864.
+
+## Perfil de desempenho em desenvolvimento
+
+A branch `perf/android-parallel-gc` adiciona uma seleção ergonômica do Parallel GC como padrão somente em builds Android, preservando uma escolha explícita de coletor feita pelo usuário. A alteração ainda precisa passar pelo build ARM64 e por comparação de desempenho no aparelho. Detalhes: [Perfil de desempenho Android](docs/PERFORMANCE_PROFILE.md).
 
 ## O que existe
 
@@ -38,11 +42,11 @@ Os detalhes e o plano de validação estão em [docs/ANDROID_TEST_LOG_2026-11-05
 
 ## Limites técnicos
 
-A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, driver gráfico, mods ou configurações de receitas. Avisos do OpenGL/GL4ES e do ProjectE precisam ser corrigidos na camada correspondente. Não serão adicionadas flags experimentais de GC ou de heap sem medições reproduzíveis.
+A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, driver gráfico, mods ou configurações de receitas. Avisos do OpenGL/GL4ES e do ProjectE precisam ser corrigidos na camada correspondente. Não serão adicionadas flags experimentais de heap, nem limites fixos de threads, sem medições reproduzíveis. O perfil de throughput usa Parallel GC apenas como hipótese inicial para Android, ainda sujeito à validação no aparelho.
 
 ## Próximas validações
 
-1. Configurar JNA para extrair bibliotecas nativas em diretório privado do app e confirmar novo log.
+1. Confirmar a correção JNA no próximo log do launcher.\n2. Validar o perfil Parallel GC com build ARM64 e benchmark no aparelho.
 2. Testar Forge 14.23.5.2864.
 3. Medir FPS, memória e pausas de GC em mundo já gerado e durante exploração.
 4. Fazer sessão prolongada sem crash.
