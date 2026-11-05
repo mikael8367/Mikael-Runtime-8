@@ -15,6 +15,7 @@
 ## Marco 1 — Escolha e reprodução da base Java 8
 - [ ] Fixar a origem e o commit exato do código-fonte escolhido.
 - [x] Fazer auditoria estática inicial dos scripts de build, patches e workflow upstream.
+- [x] Criar auditor automatizado dos SHAs Git de 12 arquivos da receita upstream e detectar riscos de build conhecidos.
 - [x] Fazer revisão parcial dos três patches Android pequenos acessíveis.
 - [x] Recuperar e inventariar integralmente o patch Android principal (207 caminhos).
 - [x] Fazer revisão estática inicial dos principais subsistemas e registrar achados.
@@ -22,6 +23,7 @@
 - [ ] Executar e registrar os testes em ambiente Android ARM64 real.
 - [ ] Auditar licenças e avisos de OpenJDK, ICU, Android e demais dependências; gerar SBOM.
 - [ ] Resolver uma toolchain de compilação reproduzível para Android ARM64.
+- [ ] Fixar hashes oficiais do NDK r10e e das dependências nativas antes de qualquer download/extração.
 - [ ] Reproduzir a compilação em ambiente isolado; não assumir que a receita antiga funciona.
 - [ ] Registrar hashes e proveniência dos artefatos gerados.
 
