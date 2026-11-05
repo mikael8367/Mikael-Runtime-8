@@ -17,7 +17,8 @@
 - [x] Fazer revisão parcial dos três patches Android pequenos acessíveis.
 - [x] Recuperar e inventariar integralmente o patch Android principal (207 caminhos).
 - [x] Fazer revisão estática inicial dos principais subsistemas e registrar achados.
-- [ ] Executar testes específicos de JNI, GC, JIT, Java2D, threads, sinais, rede e memória.
+- [x] Definir matriz de testes para JNI, GC, JIT, Java2D, threads, sinais, rede e memória.
+- [ ] Executar e registrar os testes em ambiente Android ARM64 real.
 - [ ] Auditar licenças e avisos de OpenJDK, ICU, Android e demais dependências; gerar SBOM.
 - [ ] Resolver uma toolchain de compilação reproduzível para Android ARM64.
 - [ ] Reproduzir a compilação em ambiente isolado; não assumir que a receita antiga funciona.
