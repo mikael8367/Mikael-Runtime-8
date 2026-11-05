@@ -6,8 +6,8 @@ from scripts.audit_openjdk8_recipe import git_blob_sha, inspect_recipe_text
 
 class OpenJDK8RecipeAuditTests(unittest.TestCase):
     def test_git_blob_sha_uses_git_blob_header(self):
-        data = b"test\\n"
-        expected = hashlib.sha1(b"blob 5\\0test\\n").hexdigest()
+        data = b"test\n"
+        expected = hashlib.sha1(b"blob 5\0test\n").hexdigest()
         self.assertEqual(git_blob_sha(data), expected)
 
     def test_detects_unsafe_patch_application(self):
@@ -25,7 +25,7 @@ class OpenJDK8RecipeAuditTests(unittest.TestCase):
     def test_detects_unverified_downloads(self):
         findings = inspect_recipe_text({
             "getlibs.sh": "wget https://example.invalid/source.tar.gz",
-            "ci_build_global.sh": "wget https://example.invalid/ndk.zip\\nunzip ndk.zip",
+            "ci_build_global.sh": "wget https://example.invalid/ndk.zip\nunzip ndk.zip",
         })
         self.assertTrue(any("FreeType/CUPS" in item for item in findings))
         self.assertTrue(any("NDK" in item and "integrity" in item for item in findings))
@@ -40,7 +40,7 @@ class OpenJDK8RecipeAuditTests(unittest.TestCase):
 
     def test_reports_legacy_ndk_constraints(self):
         findings = inspect_recipe_text({
-            "setdevkitpath.sh": "export NDK_VERSION=r10e\\nexport API=21"
+            "setdevkitpath.sh": "export NDK_VERSION=r10e\nexport API=21"
         })
         self.assertTrue(any("NDK r10e" in item for item in findings))
 
