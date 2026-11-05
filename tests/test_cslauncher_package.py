@@ -19,14 +19,15 @@ def fake_elf(machine=183, elf_class=2):
 class CsLauncherPackageTests(unittest.TestCase):
     def make_fake_jre(self, root: Path, machine=183):
         (root / "bin").mkdir(parents=True)
-        (root / "lib" / "server").mkdir(parents=True)
+        (root / "lib" / "aarch64" / "server").mkdir(parents=True)
         (root / "release").write_text(
             'JAVA_VERSION="1.8.0_442"\nOS_ARCH="aarch64"\n', encoding="utf-8"
         )
         java = root / "bin" / "java"
         java.write_bytes(fake_elf(machine))
         java.chmod(0o755)
-        (root / "lib" / "server" / "libjvm.so").write_bytes(fake_elf(machine))
+        (root / "lib" / "aarch64" / "server" / "libjvm.so").write_bytes(fake_elf(machine))
+        (root / "lib" / "rt.jar").write_bytes(b"fake-rt-jar")
 
     def test_rejects_missing_jre(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -48,6 +49,23 @@ class CsLauncherPackageTests(unittest.TestCase):
             errors = validate_jre(root)
             self.assertTrue(any("AArch64" in e for e in errors))
 
+    def test_rejects_libjvm_in_wrong_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "jre"
+            self.make_fake_jre(root)
+            jvm = root / "lib" / "aarch64" / "server" / "libjvm.so"
+            wrong = root / "lib" / "server" / "libjvm.so"
+            wrong.parent.mkdir(parents=True)
+            jvm.rename(wrong)
+            self.assertTrue(any("lib/aarch64/server/libjvm.so" in e for e in validate_jre(root)))
+
+    def test_rejects_missing_core_rt_jar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "jre"
+            self.make_fake_jre(root)
+            (root / "lib" / "rt.jar").unlink()
+            self.assertTrue(any("lib/rt.jar" in e for e in validate_jre(root)))
+
     def test_rejects_non_elf_java(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
@@ -62,14 +80,14 @@ class CsLauncherPackageTests(unittest.TestCase):
             self.make_fake_jre(root)
             external = base / "outside.so"
             external.write_bytes(fake_elf())
-            (root / "lib" / "server" / "escape.so").symlink_to(external)
+            (root / "lib" / "aarch64" / "server" / "escape.so").symlink_to(external)
             self.assertTrue(any("Symlink escapes" in e for e in validate_jre(root)))
 
     def test_rejects_dangling_symlink(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "jre"
             self.make_fake_jre(root)
-            (root / "lib" / "server" / "dangling.so").symlink_to("missing.so")
+            (root / "lib" / "aarch64" / "server" / "dangling.so").symlink_to("missing.so")
             self.assertTrue(any("Dangling symlink" in e for e in validate_jre(root)))
 
     def test_packages_root_layout_and_validates_elf(self):
