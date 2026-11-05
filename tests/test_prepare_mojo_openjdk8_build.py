@@ -2,7 +2,7 @@ import unittest
 
 from scripts.prepare_mojo_openjdk8_build import (
     GCC_SHA256, OPENJDK_COMMIT, PATCH_BLOBS, git_blob_sha,
-    hardened_scripts, strict_patch_block,
+    hardened_scripts, harden_buildlibs_script, smoke_test_script, strict_patch_block,
 )
 
 class PrepareMojoBuildTests(unittest.TestCase):
@@ -28,6 +28,24 @@ class PrepareMojoBuildTests(unittest.TestCase):
         self.assertIn("d08dfdc73ff5b6061e134b90bec16489655015f5", scripts["tarjdk.sh"])
         self.assertIn("\n", scripts["clonejdk.sh"])
         self.assertIn("tr -d '[:space:]'", scripts["tarjdk.sh"])
+
+    def test_freetype_failure_reports_real_config_log(self):
+        original = '''if [[ "$error_code" -ne 0 ]]; then
+  echo "\\n\\nCONFIGURE ERROR $error_code , config.log:"
+  cat config.log
+  exit $error_code
+fi'''
+        hardened = harden_buildlibs_script(original)
+        self.assertIn("builds/unix/config.log", hardened)
+        self.assertIn("find . -name config.log", hardened)
+        self.assertNotIn("cat config.log", hardened)
+
+    def test_arm64_toolchain_smoke_test_compiles_and_checks_architecture(self):
+        script = smoke_test_script()
+        self.assertIn('"$compiler" -v', script)
+        self.assertIn('-print-file-name=', script)
+        self.assertIn('-fPIE -pie', script)
+        self.assertIn("grep -q 'AArch64'", script)
 
     def test_patch_block_fails_closed(self):
         block = strict_patch_block()
