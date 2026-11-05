@@ -46,7 +46,8 @@ A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, dri
 
 ## Próximas validações
 
-1. Confirmar a correção JNA no próximo log do launcher.\n2. Validar o perfil Parallel GC com build ARM64 e benchmark no aparelho.
+1. Confirmar a correção JNA no próximo log do launcher.
+2. Validar os perfis Parallel GC e memória adaptativa com build ARM64 e benchmark no aparelho.
 2. Testar Forge 14.23.5.2864.
 3. Medir FPS, memória e pausas de GC em mundo já gerado e durante exploração.
 4. Fazer sessão prolongada sem crash.
