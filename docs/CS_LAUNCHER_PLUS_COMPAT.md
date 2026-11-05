@@ -14,7 +14,9 @@ The final archive must be a plain `.tar.xz` whose entries are rooted directly at
 - `release` contains `JAVA_VERSION="1.8...."`.
 - `release` contains `OS_ARCH="aarch64"` (accepted alias: `arm64`).
 - `bin/java` exists, is executable and is an ELF64 little-endian AArch64 binary.
-- `lib/` contains the HotSpot `libjvm.so` and the native runtime libraries.
+- `lib/aarch64/server/libjvm.so` contains the HotSpot Server VM in the exact ARM64 layout expected by this build.
+- `lib/rt.jar` contains the Java 8 core class library.
+- `lib/` contains the remaining native runtime libraries.
 - Every packaged native `.so` must be ELF64 little-endian AArch64.
 - All required Java libraries and native dependencies are included.
 - File modes and symbolic links are preserved.
