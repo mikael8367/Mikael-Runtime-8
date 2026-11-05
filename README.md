@@ -10,7 +10,7 @@ Isso comprova o teste funcional inicial, não compatibilidade universal, estabil
 
 ## Perfil de desempenho em desenvolvimento
 
-A branch `perf/android-parallel-gc` adiciona uma seleção ergonômica do Parallel GC como padrão somente em builds Android, preservando uma escolha explícita de coletor feita pelo usuário. A alteração ainda precisa passar pelo build ARM64 e por comparação de desempenho no aparelho. Detalhes: [Perfil de desempenho Android](docs/PERFORMANCE_PROFILE.md).
+A branch `perf/android-parallel-gc` seleciona Parallel GC por ergonomia em Android. A branch `memory/android-adaptive-heap` acrescenta redução adaptativa do heap ocioso após picos, preservando opções explícitas. Ambas aguardam build ARM64 e benchmark no aparelho. Detalhes: [Desempenho](docs/PERFORMANCE_PROFILE.md) e [Memória](docs/MEMORY_PROFILE.md).
 
 ## O que existe
 
@@ -42,7 +42,7 @@ Os detalhes e o plano de validação estão em [docs/ANDROID_TEST_LOG_2026-11-05
 
 ## Limites técnicos
 
-A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, driver gráfico, mods ou configurações de receitas. Avisos do OpenGL/GL4ES e do ProjectE precisam ser corrigidos na camada correspondente. Não serão adicionadas flags experimentais de heap, nem limites fixos de threads, sem medições reproduzíveis. O perfil de throughput usa Parallel GC apenas como hipótese inicial para Android, ainda sujeito à validação no aparelho.
+A JVM não substitui nem controla diretamente o launcher, JNA, LWJGL, GL4ES, driver gráfico, mods ou configurações de receitas. Avisos do OpenGL/GL4ES e do ProjectE precisam ser corrigidos na camada correspondente. Não são fixados `-Xms`, `-Xmx` nem limites de threads. O perfil Android usa Parallel GC e um limite adaptativo conservador de heap livre (85%) somente como hipótese inicial, preservando valores explícitos do usuário; ambos dependem de benchmark no aparelho.
 
 ## Próximas validações
 
