@@ -13,6 +13,8 @@ from pathlib import Path, PurePosixPath
 JAVA_VERSION_RE = re.compile(r'^JAVA_VERSION="([^"]+)"$', re.MULTILINE)
 OS_ARCH_RE = re.compile(r'^OS_ARCH="([^"]+)"$', re.MULTILINE)
 ELF_MACHINE_AARCH64 = 183
+JVM_RELATIVE_PATH = PurePosixPath("lib/aarch64/server/libjvm.so")
+CORE_RUNTIME_JARS = (PurePosixPath("lib/rt.jar"),)
 
 
 def elf_errors(data: bytes, label: str) -> list[str]:
@@ -95,10 +97,13 @@ def validate_jre(root: Path) -> list[str]:
         if not native_files:
             errors.append("No native .so libraries found under lib/.")
 
-    jvm = next((p for p in native_files if p.name == "libjvm.so"), None)
-    if jvm is None:
-        errors.append("Missing HotSpot VM library libjvm.so under lib/.")
-
+    jvm = root / Path(*JVM_RELATIVE_PATH.parts)
+    if not jvm.is_file() or jvm.is_symlink():
+        errors.append(f"Missing HotSpot VM library at {JVM_RELATIVE_PATH}.")
+    for relative in CORE_RUNTIME_JARS:
+        core_jar = root / Path(*relative.parts)
+        if not core_jar.is_file() or core_jar.is_symlink():
+            errors.append(f"Missing required Java runtime library: {relative}.")
     for native in native_files:
         errors.extend(elf_errors(read_elf_header(native), str(native.relative_to(root))))
     return errors
@@ -162,10 +167,13 @@ def validate_archive(archive_path: Path) -> list[str]:
                 errors.append("Archive must have a regular bin/java file at its root.")
             if not any(name.startswith("lib/") and name.endswith(".so") for name in members):
                 errors.append("Archive must contain native libraries under lib/.")
-            if not any(PurePosixPath(name).name == "libjvm.so" and name.startswith("lib/") and m.isfile()
-                       for name, m in members.items()):
-                errors.append("Archive is missing HotSpot libjvm.so under lib/.")
-
+            jvm_member = members.get(JVM_RELATIVE_PATH.as_posix())
+            if not jvm_member or not jvm_member.isfile():
+                errors.append(f"Archive is missing HotSpot VM at {JVM_RELATIVE_PATH}.")
+            for relative in CORE_RUNTIME_JARS:
+                core_member = members.get(relative.as_posix())
+                if not core_member or not core_member.isfile():
+                    errors.append(f"Archive is missing required Java runtime library: {relative}.")
             release_member = members.get("release")
             release_stream = archive.extractfile(release_member) if release_member and release_member.isfile() else None
             release_text = release_stream.read().decode("utf-8", "replace") if release_stream else ""
