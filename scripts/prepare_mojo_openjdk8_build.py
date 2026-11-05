@@ -144,6 +144,20 @@ rm -f .mikael-toolchain-smoke .mikael-toolchain-smoke.c
 echo "Android ARM64 toolchain smoke test passed."
 '''
 
+def inject_toolchain_smoke_test(global_text: str) -> str:
+    marker = "  ./maketoolchain.sh"
+    lines = global_text.splitlines(keepends=True)
+    matches = [i for i, line in enumerate(lines) if line.rstrip("\\r\\n") == marker]
+    if len(matches) != 1:
+        raise ValueError(
+            "Expected exactly one ./maketoolchain.sh hook in ci_build_global.sh; "
+            f"found {len(matches)}."
+        )
+    index = matches[0]
+    newline = "\\r\\n" if lines[index].endswith("\\r\\n") else "\\n"
+    lines.insert(index + 1, "  ./smoke_test_android_toolchain.sh" + newline)
+    return "".join(lines)
+
 def strict_patch_block() -> str:
     return """# Apply the pinned Android patch set strictly; any mismatch aborts the build.
 for patch in jdk8u_android.diff jdk8u_android_branding.diff jdk8u_android_main.diff; do
@@ -194,12 +208,8 @@ def prepare(recipe_dir: Path, openjdk_commit: str = OPENJDK_COMMIT) -> None:
     )
     global_build = recipe_dir / "ci_build_global.sh"
     global_text = global_build.read_text(encoding="utf-8")
-    needle = "  ./maketoolchain.sh\\n"
-    if needle not in global_text:
-        raise ValueError("Could not locate toolchain build hook in ci_build_global.sh.")
     global_build.write_text(
-        global_text.replace(needle, needle + "  ./smoke_test_android_toolchain.sh\\n", 1),
-        encoding="utf-8",
+        inject_toolchain_smoke_test(global_text), encoding="utf-8"
     )
     build_file.write_text(hardened_build, encoding="utf-8")
     workflow = recipe_dir / ".github" / "workflows" / "build.yml"
