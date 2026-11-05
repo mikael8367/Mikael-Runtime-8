@@ -1,41 +1,55 @@
 # Teste no Android (sem PC)
 
-Este kit permite verificar funções básicas de uma JRE Java 8 ARM64 candidata diretamente no Android. O JAR é um diagnóstico, não é a Mikael Runtime 8 e não contém JVM.
+Este kit verifica a JVM usada para executar o diagnóstico. O JAR não é a Mikael Runtime 8 e não contém JVM.
 
-## Como obter o JAR
+## Como obter o kit
 
-1. Abra a aba **Actions** do repositório.
-2. Execute o workflow **Build Android Runtime Test Kit** ou abra a execução mais recente.
-3. Em **Artifacts**, baixe `MikaelRuntime8-Device-Test-Kit`.
-4. Extraia o ZIP no celular.
+1. Abra o repositório no navegador do celular: https://github.com/mikael8367/Mikael-Runtime-8
+2. Entre em **Actions**.
+3. Abra **Build Android Runtime Test Kit** e selecione a execução mais recente com resultado verde.
+4. Em **Artifacts**, baixe `MikaelRuntime8-Device-Test-Kit`.
+5. Extraia o ZIP. Ele contém `MikaelRuntimeSmokeTest.jar`, este guia e `SHA256SUMS.txt`.
+
+Se não houver execução verde ou o artefato não aparecer, não use um pacote antigo como se fosse o mais recente.
 
 ## Como executar
 
-Use uma runtime Java 8 ARM64 já instalada no FCL/CS Launcher Plus para o teste preliminar. Abra um terminal que consiga executar o binário Java dessa runtime e rode:
+É necessário um ambiente Android que consiga chamar o executável Java da runtime escolhida. No terminal desse ambiente, entre na pasta extraída e execute:
 
 ```sh
 java -jar MikaelRuntimeSmokeTest.jar
 ```
 
-Se o launcher permitir argumentos Java personalizados, pode-se usar o JAR como classe principal de diagnóstico. O relatório imprime propriedades da VM e o resultado de cada teste.
+O comando precisa usar a runtime que você quer diagnosticar. Se o terminal estiver usando outra Java, o relatório mostrará isso em `java.home`, `java.version` e `java.class.path`.
+
+## Onde fica o relatório
+
+O programa mostra os resultados na tela e tenta salvar automaticamente:
+
+- primeiro em `user.dir/MikaelRuntime8-device-report.txt`;
+- se não conseguir, tenta em `java.io.tmpdir/MikaelRuntime8-device-report.txt`.
+
+No final, ele imprime `REPORT_FILE=` com o caminho encontrado. Envie esse arquivo ou copie toda a saída, incluindo as linhas `[FAIL]` e `RESULT`.
 
 ## O que é verificado
 
 - Java 8 e arquitetura ARM64;
 - carregamento de classes e reflexão;
 - threads e sincronização;
-- alocação de memória e chamada de GC;
-- leitura/escrita de arquivos UTF-8;
-- leitura/escrita de ZIP/JAR;
-- visibilidade opcional de LaunchWrapper, Forge e Minecraft no classpath do processo.
+- alocação de memória e métricas de heap/GC;
+- leitura e escrita de arquivos UTF-8;
+- leitura e escrita de ZIP/JAR;
+- diretório temporário gravável;
+- presença opcional de LaunchWrapper, Forge e Minecraft no classpath.
 
-As verificações de LaunchWrapper/Forge/Minecraft são informativas quando esses JARs não estão no classpath do processo de diagnóstico.
+As classes de Minecraft/Forge ausentes no classpath do diagnóstico aparecem como `[INFO]`, não como falha.
 
-## Limitações
+## Importante
 
-- O teste com uma runtime existente verifica o ambiente atual, não uma JVM Mikael Runtime 8 própria.
-- O kit não testa renderização GL4ES, LWJGL nativo, OptiFine ou compatibilidade completa de modpacks.
-- A runtime própria ainda precisa ser compilada antes de poder ser selecionada e testada.
-- Não use resultado PASS deste kit como prova de compatibilidade do Minecraft.
+- O resultado descreve somente a runtime que executou o JAR.
+- Não comprova que a Mikael Runtime 8 própria funciona: ela ainda precisa ser compilada.
+- Não testa renderização GL4ES, LWJGL nativo, OptiFine nem um modpack completo.
+- Não instale nem substitua a runtime do launcher com arquivos de teste.
+- Um resultado `PASS` não é prova de compatibilidade com Minecraft.
 
-Guarde a saída completa e envie o texto ou arquivo do relatório para análise.
+Se o celular não tiver um ambiente que permita executar `java -jar` usando a runtime do launcher, este kit não consegue ser executado diretamente pelo FCL/CS Launcher Plus. Nesse caso, envie o modelo do ambiente disponível e ajustaremos o método sem presumir que o launcher aceite executar JARs arbitrários.
