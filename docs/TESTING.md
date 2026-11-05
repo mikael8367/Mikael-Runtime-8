@@ -60,3 +60,26 @@ Antes de marcar uma versão como estável:
 | RAM máxima | |
 | Tempo de inicialização | |
 | Resultado / logs | |
+
+
+## 5. Compatibilidade com mods e modpacks
+
+Consultar [MOD_COMPATIBILITY.md](MOD_COMPATIBILITY.md) e validar o contrato com:
+
+```bash
+python scripts/validate_compatibility.py
+python -m unittest tests.test_compatibility -v
+```
+
+Sequência obrigatória no Android ARM64:
+1. Vanilla 1.12.2.
+2. Forge 14.23.5.2864 sem mods adicionais.
+3. OptiFine HD U G5 sozinho.
+4. Forge + OptiFine HD U G5.
+5. Mods em grupos pequenos, incluindo suas dependências.
+6. Modpack grande com configs, overrides e todas as bibliotecas preservadas.
+7. Repetir os cenários suportados no FCL e no CS Launcher Plus.
+
+Em cada execução, registrar a lista e versão dos mods, classpath efetivo, argumentos JVM, bibliotecas nativas extraídas, renderer, `latest.log` e crash report. Classificar a falha como JVM, launcher, mod conflitante, dependência ausente, ABI nativa ou renderização.
+
+**Não declarar compatibilidade universal:** um contrato validado apenas prova que a estrutura esperada está configurada. Só testes reais demonstram que uma build específica do Forge, OptiFine ou modpack funciona.
