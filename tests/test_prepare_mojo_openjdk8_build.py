@@ -173,7 +173,7 @@ fi'''
         self.assertIn("mikael_android_adaptive_heap.diff", block)
         self.assertIn("a1ef6110308229e06588763db33f17a701c91c35", block)
         self.assertIn("mikael_android_simd_memory.diff", block)
-        self.assertIn("105bc93c836839285e9f63a587339abc6f83ee24", block)
+        self.assertIn("fa166ee3e0f977042ac71f68aa6d3fc5366cd07b", block)
 
 if __name__ == "__main__":
     unittest.main()
