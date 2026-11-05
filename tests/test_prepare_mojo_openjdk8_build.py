@@ -51,16 +51,16 @@ fi'''
         self.assertIn("grep -q 'AArch64'", script)
 
     def test_smoke_test_is_inserted_after_toolchain_build(self):
-        source = "#!/bin/bash\\n  ./maketoolchain.sh\\nelse\\n  echo ios\\nfi\\n"
+        source = "#!/bin/bash\n  ./maketoolchain.sh\nelse\n  echo ios\nfi\n"
         result = inject_toolchain_smoke_test(source)
         self.assertIn(
-            "  ./maketoolchain.sh\\n  ./smoke_test_android_toolchain.sh\\nelse",
+            "  ./maketoolchain.sh\n  ./smoke_test_android_toolchain.sh\nelse",
             result,
         )
         with self.assertRaises(ValueError):
-            inject_toolchain_smoke_test("#!/bin/bash\\necho no hook\\n")
+            inject_toolchain_smoke_test("#!/bin/bash\necho no hook\n")
         with self.assertRaises(ValueError):
-            inject_toolchain_smoke_test("  ./maketoolchain.sh\\n  ./maketoolchain.sh\\n")
+            inject_toolchain_smoke_test("  ./maketoolchain.sh\n  ./maketoolchain.sh\n")
 
     def test_patch_block_fails_closed(self):
         block = strict_patch_block()
