@@ -36,3 +36,10 @@ The packager checks Java version, architecture, executable presence and native l
 **Not yet installable in CS Launcher Plus.** The repository does not contain a compiled JRE or release archive. The packager is the compatibility boundary; it does not compile OpenJDK and does not add a download URL to the launcher. A later launcher integration can add a Mikael Runtime entry once a tested archive is published and its checksum and license notices are available.
 
 For now, do not select a fabricated runtime name or manually rename another runtime. A profile can only use Mikael Runtime 8 after the archive has been installed and the launcher's runtime manager can read its Java 8 metadata.
+
+
+## Mods, OptiFine e modpacks
+
+A runtime deve ser transparente ao classpath criado pelo launcher: não reordenar nem filtrar JARs de mods e bibliotecas. O launcher continua responsável por resolver dependências, disponibilizar o diretório do jogo e extrair as bibliotecas nativas LWJGL adequadas.
+
+A integração não está testada com uma JRE real. Antes de anunciar suporte, validar a sequência Vanilla, Forge, OptiFine isolado, Forge + OptiFine, mods em grupos e modpack grande nos dois launchers. Ver [MOD_COMPATIBILITY.md](MOD_COMPATIBILITY.md).
