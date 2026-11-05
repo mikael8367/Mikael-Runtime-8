@@ -122,7 +122,7 @@ if [[ "${BUILD_IOS:-0}" == "1" ]]; then
 fi
 glibc_version="$(getconf GNU_LIBC_VERSION | awk '{print $2}')"
 echo "Host GLIBC: $glibc_version"
-if [[ "$(printf '2.38\\n%s\\n' "$glibc_version" | sort -V | head -n 1)" != "2.38" ]]; then
+if ! awk -v version="$glibc_version" 'BEGIN { split(version, v, /\\./); exit ! (v[1] > 2 || (v[1] == 2 && v[2] >= 38)) }'; then
   echo "Pinned GCC 13 toolchain requires host GLIBC >= 2.38." >&2
   exit 1
 fi
