@@ -30,6 +30,18 @@ O `latest.log` enviado confirma:
 
 Relatório completo: [ANDROID_TEST_LOG_2026-11-05.md](ANDROID_TEST_LOG_2026-11-05.md).
 
+## Perfil de desempenho — branch em validação
+
+A branch `perf/android-parallel-gc` adiciona um patch Android-only no HotSpot 8 para selecionar `UseParallelGC` como padrão ergonômico quando nenhum coletor foi explicitamente escolhido. A seleção explícita pelo usuário permanece respeitada. A alteração não fixa o número de threads.
+
+- Patch: `patches/mikael_android_parallel_gc.diff`.
+- Hash Git blob: `46f5cec59df926f869de7847246ea841e8865c47`.
+- Teste de regressão: valida hash, guarda Android, opção Parallel GC e inclusão no bloco de aplicação estrita.
+- Teste local de patch: `git apply --check` passou contra o trecho-fonte fixado do OpenJDK.
+- CI run: [Build #36](https://github.com/mikael8367/Mikael-Runtime-8/actions/runs/42127456896), atualmente em compilação no momento desta atualização.
+
+**Ainda não aprovado para uso diário:** falta concluir a compilação/empacotamento e comparar no aparelho o FPS, pausas de GC, memória e estabilidade com o mesmo mundo/modpack. O Parallel GC é uma hipótese de throughput, não um ganho de FPS comprovado. Detalhes: [PERFORMANCE_PROFILE.md](PERFORMANCE_PROFILE.md).
+
 ## Pipeline ARM64
 
 O workflow usa Ubuntu 24.04 e JDK 8 de bootstrap. Ele fixa a receita MojoLauncher, OpenJDK 8u, patches, FreeType, CUPS, NDK r10e, GCC toolchain e termux-elf-cleaner; aplica patches estritamente, compila HotSpot Server AArch64, valida ELF64/AArch64 e empacota o formato MultiRT.
