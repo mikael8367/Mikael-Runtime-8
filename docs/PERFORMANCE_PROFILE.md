@@ -1,0 +1,51 @@
+# Perfil de desempenho Android — Mikael Runtime 8
+
+## Alteração implementada nesta branch
+
+A branch `perf/android-parallel-gc` adiciona um patch pequeno ao HotSpot 8:
+
+- Em builds Android (`__ANDROID__`), quando o HotSpot ainda não recebeu uma escolha explícita de coletor, a ergonomia seleciona `UseParallelGC`.
+- Fora do Android, a lógica original de seleção de coletor permanece inalterada.
+- Opções explícitas do usuário, como `-XX:+UseG1GC`, `-XX:+UseSerialGC` ou `-XX:+UseParallelGC`, continuam tendo precedência porque `select_gc()` só chama a seleção ergonômica quando nenhum coletor foi selecionado.
+- Não fixa `ParallelGCThreads`: o HotSpot continua dimensionando as threads de acordo com o ambiente.
+
+## Por que esta escolha
+
+O perfil pedido prioriza throughput. O Parallel GC é o coletor de throughput do HotSpot; ele pode reduzir o custo de coleta por unidade de trabalho em cargas multi-core, mas usa pausas stop-the-world. Portanto, não há garantia de FPS maior nem de menos stutter em todos os modpacks.
+
+G1 foi projetado para metas de latência e tende a fazer mais sentido em heaps maiores; a documentação Java 8 o recomenda para heaps grandes, aproximadamente 6 GB ou mais, com requisitos de latência. Isso não descreve bem o telefone Android de memória limitada usado no primeiro teste. A escolha do Parallel GC é uma hipótese de desempenho a ser medida no aparelho, não uma promessa.
+
+## Testes necessários
+
+### Build/CI
+
+1. Verificar hash do patch.
+2. Aplicar o patch ao commit fixado do OpenJDK com `git apply --check`.
+3. Compilar HotSpot Server AArch64.
+4. Empacotar a runtime e validar o formato MultiRT e ELF64/AArch64.
+
+### Teste no Android
+
+Comparar a versão anterior com a versão desta branch no mesmo aparelho e no mesmo mundo já gerado. Manter iguais resolução, distância de renderização, mods, opções gráficas e limite de memória.
+
+Registrar:
+- FPS médio e quedas perceptíveis;
+- memória usada e heap máximo;
+- mensagens/pausas de GC;
+- atrasos do servidor integrado;
+- temperatura/limitação térmica, se o launcher disponibilizar essa informação;
+- estabilidade por pelo menos 20–30 minutos.
+
+Para diagnóstico temporário, pode-se acrescentar:
+```
+-XX:+PrintGCDetails -XX:+PrintGCTimeStamps
+```
+Essas opções geram logs e não devem ser usadas na comparação de FPS final, pois a escrita de logs adiciona sobrecarga. Removê-las depois do diagnóstico.
+
+### Critério de aceitação
+
+Manter o novo padrão somente se o build passar e a comparação no aparelho mostrar ganho reproduzível de throughput sem regressão inaceitável de pausas, stutter, memória ou estabilidade. Se as pausas piorarem, reverter o padrão e manter o coletor selecionável manualmente.
+
+## Limites
+
+Esta alteração afeta a seleção ergonômica do coletor de lixo. Não altera o JIT, o renderer GL4ES, drivers, geração de chunks ou a carga de mods. Não é possível inferir ganho de FPS a partir de uma compilação bem-sucedida.
