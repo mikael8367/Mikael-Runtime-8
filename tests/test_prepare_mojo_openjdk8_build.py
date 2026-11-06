@@ -5,7 +5,7 @@ from pathlib import Path
 from scripts.prepare_mojo_openjdk8_build import (
     GCC_SHA256, OPENJDK_COMMIT, PATCH_BLOBS, git_blob_sha,
     hardened_scripts, harden_buildlibs_script, inject_toolchain_smoke_test, smoke_test_script,
-    strict_patch_block, compatible_branding_patch ,
+    strict_patch_block, compatible_branding_patch,
 )
 
 class PrepareMojoBuildTests(unittest.TestCase):
