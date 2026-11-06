@@ -5,7 +5,7 @@ from pathlib import Path
 from scripts.prepare_mojo_openjdk8_build import (
     GCC_SHA256, OPENJDK_COMMIT, PATCH_BLOBS, git_blob_sha,
     hardened_scripts, harden_buildlibs_script, inject_toolchain_smoke_test, smoke_test_script,
-    strict_patch_block, compatible_branding_patch,
+    strict_patch_block, compatible_branding_patch, tune_aarch64_native_build_script,
 )
 
 class PrepareMojoBuildTests(unittest.TestCase):
@@ -56,6 +56,24 @@ fi'''
         self.assertIn('-print-file-name=', script)
         self.assertIn('-fPIE -pie', script)
         self.assertIn("grep -q 'AArch64'", script)
+
+    def test_aarch64_native_tuning_is_scoped_and_preserves_generic_isa(self):
+        source = '''#!/usr/bin/env bash
+if [[ "$BUILD_IOS" != "1" ]]; then
+  export CFLAGS+=" -O3 -D__ANDROID__"
+fi
+'''
+        tuned = tune_aarch64_native_build_script(source)
+        self.assertIn('if [[ "$TARGET_JDK" == "aarch64" ]]', tuned)
+        self.assertIn('-mtune=cortex-a53', tuned)
+        self.assertIn('export CFLAGS+=" -O3 -D__ANDROID__"', tuned)
+        self.assertNotIn('-mcpu=cortex-a53', tuned)
+        self.assertNotIn('-march=cortex-a53', tuned)
+        self.assertEqual(tuned.count('-mtune=cortex-a53'), 1)
+        with self.assertRaises(ValueError):
+            tune_aarch64_native_build_script("no Android CFLAGS hook")
+        with self.assertRaises(ValueError):
+            tune_aarch64_native_build_script(source + '  export CFLAGS+=" -O3 -D__ANDROID__"\n')
 
     def test_smoke_test_is_inserted_after_toolchain_build(self):
         source = "#!/bin/bash\n  ./maketoolchain.sh\nelse\n  echo ios\nfi\n"
