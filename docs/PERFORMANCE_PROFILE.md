@@ -69,3 +69,21 @@ Os stubs AArch64 já têm caminhos SIMD e não SIMD. O objetivo é testar cópia
 **Não é um ajuste de renderização:** não modifica PowerVR, OpenGL ES, GL4ES, LWJGL, shaders, OptiFine ou a GPU. Não declarar aumento de FPS antes do benchmark no mesmo mundo, resolução, render distance, heap e conjunto de mods.
 
 Plano, requisitos de CPU e teste: [ANDROID_SIMD_PROFILE.md](ANDROID_SIMD_PROFILE.md).
+
+
+## Ajuste nativo para Cortex-A53
+
+A branch `perf/android-cortex-a53-native-tune` acrescenta **-mtune=cortex-a53** à compilação C/C++ do JDK/HotSpot somente no alvo AArch64 Android.
+
+- O Galaxy A12 SM-A125M usa o MediaTek Helio P35 com núcleos Cortex-A53.
+- `-mtune` altera o escalonamento de instruções para esse núcleo; não é `-mcpu` nem `-march`, portanto não aumenta a ISA mínima exigida do runtime.
+- Pode ajudar código nativo do HotSpot e bibliotecas do JDK (por exemplo, operações de ZIP e inicialização nativa), mas não altera a geração de código Java feita pelo compilador JIT C2.
+- O possível efeito em FPS e no tempo de carregamento é limitado e precisa ser medido no aparelho; não há ganho presumido.
+
+### Inicialização do Minecraft
+
+O build é HotSpot Server. A compilação em camadas (Tiered Compilation) já é o modo padrão da Server VM no Java 8, combinando compilação inicial mais rápida com otimização posterior. Forçá-la novamente não acrescentaria benefício. O CDS clássico do Java 8 é documentado como restrito à Client VM e ao Serial GC, combinação diferente desta runtime Server/Parallel GC; não habilitar `-Xshare:on` sem um arquivo de classes compatível.
+
+Não foram usados `-Xverify:none`, `-Xcomp` ou limites de compilação agressivos: eles podem reduzir verificações de bytecode, aumentar muito o trabalho de compilação durante a abertura ou piorar travamentos na primeira partida. A maior parte da abertura de um modpack Forge também depende de varredura de JARs, inicialização dos mods, leitura de configurações e criação de recursos; a JVM sozinha não controla essas etapas.
+
+**Validação necessária:** comparar a branch anterior e a branch A53 no mesmo aparelho, com o mesmo conjunto de mods e mundo, cronometrando do toque em Jogar até o menu/mundo e registrando FPS/frametime depois de aquecer. Manter o ajuste somente se houver melhoria repetível sem regressão.
