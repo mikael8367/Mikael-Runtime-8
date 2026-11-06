@@ -134,6 +134,7 @@ jobs:
             echo "Android default GC: Parallel GC (unless explicitly overridden)"
             echo "Android Parallel GC MaxHeapFreeRatio: 85 (only if not explicitly set)"
             echo "Android AArch64 SIMD memory stubs: enabled when HWCAP_ASIMD is present, unless explicitly overridden"
+            echo "Native AArch64 compiler tuning: -mtune=cortex-a53 (generic ISA baseline preserved)"
             echo "Device execution: NOT YET VERIFIED"
             echo "Minecraft/Forge/OptiFine: NOT YET VERIFIED"
             cat build-output/SHA256SUMS
