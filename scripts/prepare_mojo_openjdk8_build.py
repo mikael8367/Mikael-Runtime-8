@@ -131,28 +131,6 @@ fi'''
     return original.replace(old, new, 1)
 
 
-def tune_aarch64_native_build_script(original: str) -> str:
-    """Tune native AArch64 code for Cortex-A53 without changing the ISA baseline."""
-    marker = '  export CFLAGS+=" -O3 -D__ANDROID__"'
-    lines = original.splitlines(keepends=True)
-    matches = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == marker]
-    if len(matches) != 1:
-        raise ValueError(
-            "Expected exactly one Android native CFLAGS hook in buildjdk.sh; "
-            f"found {len(matches)}."
-        )
-    index = matches[0]
-    newline = "\r\n" if lines[index].endswith("\r\n") else "\n"
-    tuning = [
-        '  if [[ "$TARGET_JDK" == "aarch64" ]]; then' + newline,
-        "    # -mtune changes instruction scheduling, not the supported ARM64 ISA." + newline,
-        '    export CFLAGS+=" -mtune=cortex-a53"' + newline,
-        "  fi" + newline,
-    ]
-    lines[index + 1:index + 1] = tuning
-    return "".join(lines)
-
-
 def smoke_test_script() -> str:
     return '''#!/usr/bin/env bash
 set -euo pipefail
@@ -255,7 +233,6 @@ def prepare(recipe_dir: Path, openjdk_commit: str = OPENJDK_COMMIT) -> None:
     if start < 0 or end < 0:
         raise ValueError("Could not identify the upstream patch application section safely.")
     hardened_build = original[:start] + strict_patch_block() + "\n" + original[end:]
-    hardened_build = tune_aarch64_native_build_script(hardened_build)
     if "git apply --reject" in hardened_build or "|| echo" in hardened_build:
         raise ValueError("Unsafe patch application remains in buildjdk.sh")
     for name, content in hardened_scripts(openjdk_commit).items():
