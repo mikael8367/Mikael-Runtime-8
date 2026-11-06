@@ -10,7 +10,7 @@ Isso comprova o teste funcional inicial, não compatibilidade universal, estabil
 
 ## Perfil de desempenho em desenvolvimento
 
-A base `memory/android-adaptive-heap` compilou e foi empacotada para ARM64. A branch `perf/android-asimd-memory` acrescenta uma otimização experimental de cópia de memória SIMD/NEON, ativada apenas quando o kernel anuncia ASIMD e sem substituir uma opção explícita. O novo perfil ainda precisa compilar e ser medido no aparelho; não há ganho de FPS comprovado. Detalhes: [Desempenho](docs/PERFORMANCE_PROFILE.md), [Memória](docs/MEMORY_PROFILE.md) e [SIMD ARM64](docs/ANDROID_SIMD_PROFILE.md).
+A base `memory/android-adaptive-heap` compilou e foi empacotada para ARM64. A branch `perf/android-asimd-memory` acrescenta uma otimização experimental de cópia de memória SIMD/NEON, ativada apenas quando o kernel anuncia ASIMD e sem substituir uma opção explícita. O novo perfil ainda precisa compilar e ser medido no aparelho; não há ganho de FPS comprovado. A branch `perf/android-cortex-a53-native-tune` também testa `-mtune=cortex-a53` apenas na compilação nativa, mantendo a ISA ARM64 genérica. Esse ajuste ainda precisa ser medido no aparelho e não garante aumento de FPS ou redução perceptível no carregamento. Detalhes: [Desempenho](docs/PERFORMANCE_PROFILE.md), [Memória](docs/MEMORY_PROFILE.md) e [SIMD ARM64](docs/ANDROID_SIMD_PROFILE.md) e [perfil Cortex-A53](docs/PERFORMANCE_PROFILE.md).
 
 ## O que existe
 
